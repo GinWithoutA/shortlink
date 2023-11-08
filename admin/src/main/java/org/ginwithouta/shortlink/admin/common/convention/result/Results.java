@@ -1,7 +1,6 @@
 package org.ginwithouta.shortlink.admin.common.convention.result;
 
 import org.ginwithouta.shortlink.admin.common.convention.errorcode.BaseErrorCode;
-import org.ginwithouta.shortlink.admin.common.convention.errorcode.IErrorCode;
 import org.ginwithouta.shortlink.admin.common.convention.exception.AbstractException;
 
 import java.util.Optional;

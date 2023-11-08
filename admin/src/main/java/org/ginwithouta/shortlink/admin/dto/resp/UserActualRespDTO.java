@@ -1,18 +1,15 @@
 package org.ginwithouta.shortlink.admin.dto.resp;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import org.ginwithouta.shortlink.admin.common.serialize.PhoneDesensitizationSerializer;
 
 /**
  * @Package : org.ginwithouta.shortlink.admin.dto.resp
  * @Author : NONO Wang
- * @Date : 2023 - 11月 - 周二
- * @Desc : 用户返回参数响应
+ * @Date : 2023 - 11月 - 周三
+ * @Desc :
  */
 @Data
-public class UserRespDTO {
-
+public class UserActualRespDTO {
     /**
      * ID
      */
@@ -31,7 +28,6 @@ public class UserRespDTO {
     /**
      * 手机号
      */
-    @JsonSerialize(using = PhoneDesensitizationSerializer.class)
     private String phone;
 
     /**

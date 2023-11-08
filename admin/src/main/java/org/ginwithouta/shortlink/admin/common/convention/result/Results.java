@@ -59,13 +59,4 @@ public class Results {
                 .setCode(errorCode)
                 .setMessage(errorMessage);
     }
-
-    /**
-     * 通过 {@link IErrorCode} 构建失败响应
-     */
-    public static Result<Void> failure(IErrorCode errorCode) {
-        return new Result<Void>()
-                .setCode(errorCode.code())
-                .setMessage(errorCode.message());
-    }
 }

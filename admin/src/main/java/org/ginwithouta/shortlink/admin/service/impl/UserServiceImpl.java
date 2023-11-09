@@ -56,5 +56,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (inserted < 1) {
             throw new ClientException(UserErrorCodeEnums.USER_SAVE_ERROR);
         }
+        userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
     }
 }

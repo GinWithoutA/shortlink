@@ -1,9 +1,9 @@
 package org.ginwithouta.shortlink.admin.dao.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 /**
  * @Package : org.ginwithouta.shortlink.admin.dao.entity
@@ -53,16 +53,19 @@ public class UserDO {
     /**
      * 创建时间
      */
-    private String createTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 
     /**
      * 修改时间
      */
-    private String updateTime;
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 
     /**
      * 删除标识：0：未删除：1：已删除
      */
+    @TableLogic
     private String delFlag;
 
 }

@@ -2,6 +2,7 @@ package org.ginwithouta.shortlink.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.ginwithouta.shortlink.admin.dao.entity.UserDO;
+import org.ginwithouta.shortlink.admin.dto.req.UserRegisterReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.UserRespDTO;
 
 /**
@@ -25,4 +26,10 @@ public interface UserService extends IService<UserDO> {
      * @return          存在返回 true 不存在返回 false
      */
     Boolean hasUsername(String username);
+
+    /**
+     * 用户注册
+     * @param requestParam 注册用户请求参数
+     */
+    void register(UserRegisterReqDTO requestParam);
 }

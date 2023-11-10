@@ -4,8 +4,11 @@ import cn.hutool.core.bean.BeanUtil;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
+import org.ginwithouta.shortlink.admin.dto.req.UserLoginReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.UserRegisterReqDTO;
+import org.ginwithouta.shortlink.admin.dto.req.UserUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.UserActualRespDTO;
+import org.ginwithouta.shortlink.admin.dto.resp.UserLoginRespDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.UserRespDTO;
 import org.ginwithouta.shortlink.admin.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +55,41 @@ public class UserController {
     @PostMapping(value = "/api/short/link/v1/user")
     public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
         userService.register(requestParam);
+        return Results.success();
+    }
+
+    /**
+     * 用户信息修改
+     */
+    @PutMapping(value = "/api/short/link/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateReqDTO requestParam) {
+        userService.update(requestParam);
+        return Results.success();
+    }
+
+    /**
+     * 用户登录接口
+     */
+    @PostMapping(value = "/api/short/link/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO requestParam) {
+        UserLoginRespDTO result = userService.login(requestParam);
+        return Results.success(result);
+    }
+
+    /**
+     * 检查用户是否登录
+     */
+    @GetMapping(value = "/api/short/link/v1/user/check/login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        return Results.success(userService.checkLogin(username, token));
+    }
+
+    /**
+     * 用户退出登录
+     */
+    @DeleteMapping(value = "/api/short/link/v1/user/logout")
+    public Result<Void> logout(@RequestParam("username") String username, @RequestParam("token") String token) {
+        userService.logout(username, token);
         return Results.success();
     }
 

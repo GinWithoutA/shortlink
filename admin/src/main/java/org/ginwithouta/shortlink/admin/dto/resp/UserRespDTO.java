@@ -14,11 +14,6 @@ import org.ginwithouta.shortlink.admin.common.serialize.PhoneDesensitizationSeri
 public class UserRespDTO {
 
     /**
-     * ID
-     */
-    private String id;
-
-    /**
      * 用户名
      */
     private String username;

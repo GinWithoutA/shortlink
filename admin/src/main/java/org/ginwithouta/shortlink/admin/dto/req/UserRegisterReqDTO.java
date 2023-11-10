@@ -10,10 +10,6 @@ import lombok.Data;
  */
 @Data
 public class UserRegisterReqDTO {
-    /**
-     * ID
-     */
-    private String id;
 
     /**
      * 用户名

@@ -1,24 +1,25 @@
-package org.ginwithouta.shortlink.admin.dto.resp;
+package org.ginwithouta.shortlink.admin.dto.req;
 
 import lombok.Data;
 
 /**
- * @Package : org.ginwithouta.shortlink.admin.dto.resp
+ * @Package : org.ginwithouta.shortlink.admin.dto.req
  * @Author : NONO Wang
- * @Date : 2023 - 11月 - 周三
- * @Desc : 用户真实信息返回响应
+ * @Date : 2023 - 11月 - 周五
+ * @Desc :
  */
 @Data
-public class UserActualRespDTO {
-    /**
-     * ID
-     */
-    private String id;
+public class UserUpdateReqDTO {
 
     /**
      * 用户名
      */
     private String username;
+
+    /**
+     * 密码
+     */
+    private String password;
 
     /**
      * 真实姓名

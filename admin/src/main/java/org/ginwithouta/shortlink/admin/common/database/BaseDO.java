@@ -19,7 +19,7 @@ public class BaseDO {
     /**
      * ID
      */
-    private String id;
+    private Long id;
 
     /**
      * 创建时间

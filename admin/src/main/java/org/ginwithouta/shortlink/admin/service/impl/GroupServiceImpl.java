@@ -9,6 +9,7 @@ import org.ginwithouta.shortlink.admin.biz.user.UserContext;
 import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
+import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
@@ -57,5 +58,14 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getUsername, UserContext.getUsername());
         return baseMapper.selectOne(wrapper) != null;
 
+    }
+
+    @Override
+    public void updateGroup(ShortLinkGroupUpdateReqDTO requestParam) {
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, requestParam.getGid());
+        GroupDO groupDO = GroupDO.builder().name(requestParam.getName()).build();
+        baseMapper.update(groupDO, queryWrapper);
     }
 }

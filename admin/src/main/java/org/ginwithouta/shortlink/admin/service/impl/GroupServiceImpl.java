@@ -1,14 +1,19 @@
 package org.ginwithouta.shortlink.admin.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
+import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @Package : org.ginwithouta.shortlink.admin.service.impl
@@ -31,6 +36,16 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .sortOrder(0)
                 .build();
         baseMapper.insert(groupDO);
+    }
+
+    @Override
+    public List<ShortLinkGroupRespDTO> listGroup() {
+        // TODO 从当前请求中获取用户名
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, "ginwithouta")
+                .orderByDesc(GroupDO::getSortOrder, BaseDO::getUpdateTime);
+        List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
+        return BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
     }
 
     private boolean hasGid(String gid) {

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.admin.biz.user.UserContext;
+import org.ginwithouta.shortlink.admin.common.convention.exception.ClientException;
 import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
@@ -16,6 +17,8 @@ import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCodeEnums.GROUP_DELETE_FAIL;
 
 /**
  * @Package : org.ginwithouta.shortlink.admin.service.impl
@@ -67,5 +70,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getGid, requestParam.getGid());
         GroupDO groupDO = GroupDO.builder().name(requestParam.getName()).build();
         baseMapper.update(groupDO, queryWrapper);
+    }
+
+    @Override
+    public void deleteGroup(String gid) {
+        LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, gid);
+        GroupDO groupDO = baseMapper.selectOne(queryWrapper);
+        if (groupDO == null) {
+            throw new ClientException(GROUP_DELETE_FAIL);
+        }
+        baseMapper.delete(queryWrapper);
     }
 }

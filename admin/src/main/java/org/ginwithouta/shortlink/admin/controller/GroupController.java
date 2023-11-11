@@ -1,6 +1,6 @@
 package org.ginwithouta.shortlink.admin.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
@@ -17,7 +17,7 @@ import java.util.List;
  * @Desc : 短链接分组控制层
  */
 @RestController
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RequestMapping(value = "/api/short/link/v1/")
 public class GroupController {
     private final GroupService groupService;

@@ -17,11 +17,6 @@ import java.time.LocalDateTime;
 public class BaseDO {
 
     /**
-     * ID
-     */
-    private Long id;
-
-    /**
      * 创建时间
      */
     @TableField(fill = FieldFill.INSERT)

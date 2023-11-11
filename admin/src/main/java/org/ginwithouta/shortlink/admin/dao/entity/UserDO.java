@@ -17,6 +17,11 @@ import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 public class UserDO extends BaseDO {
 
     /**
+     * id
+     */
+    private String id;
+
+    /**
      * 用户名
      */
     private String username;

@@ -17,6 +17,12 @@ import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 @TableName(value = "t_group")
 @EqualsAndHashCode(callSuper = true)
 public class GroupDO extends BaseDO {
+
+    /**
+     * id
+     */
+    private Long id;
+
     /**
      * 短链接分组标识
      */

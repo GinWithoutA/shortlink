@@ -12,7 +12,7 @@ import org.ginwithouta.shortlink.admin.dto.resp.UserRespDTO;
  * @Package : org.ginwithouta.shortlink.admin.service.impl
  * @Author : NONO Wang
  * @Date : 2023 - 11月 - 周二
- * @Desc :
+ * @Desc : 用户业务接口
  */
 public interface UserService extends IService<UserDO> {
 

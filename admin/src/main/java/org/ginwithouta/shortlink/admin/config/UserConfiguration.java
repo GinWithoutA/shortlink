@@ -13,7 +13,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
  * @Desc :
  */
 @Configuration
-public class UserConfig {
+public class UserConfiguration {
     /**
      * 用户信息传递过滤器
      */

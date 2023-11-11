@@ -1,12 +1,9 @@
 package org.ginwithouta.shortlink.admin.dao.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.EqualsAndHashCode;
+import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 
 /**
  * @Package : org.ginwithouta.shortlink.admin.dao.entity
@@ -14,14 +11,10 @@ import java.time.LocalDateTime;
  * @Date : 2023 - 11月 - 周二
  * @Desc : 用户持久层实体
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("t_user")
-public class UserDO {
-
-    /**
-     * ID
-     */
-    private String id;
+public class UserDO extends BaseDO {
 
     /**
      * 用户名
@@ -52,23 +45,5 @@ public class UserDO {
      * 注销时间戳
      */
     private String deletionTime;
-
-    /**
-     * 创建时间
-     */
-    @TableField(fill = FieldFill.INSERT)
-    private LocalDateTime createTime;
-
-    /**
-     * 修改时间
-     */
-    @TableField(fill = FieldFill.INSERT_UPDATE)
-    private LocalDateTime updateTime;
-
-    /**
-     * 删除标识：0：未删除：1：已删除
-     */
-    @TableLogic
-    private String delFlag;
 
 }

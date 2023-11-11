@@ -11,9 +11,9 @@ import org.ginwithouta.shortlink.admin.common.database.BaseDO;
  * @Date : 2023 - 11月 - 周二
  * @Desc : 用户持久层实体
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("t_user")
+@EqualsAndHashCode(callSuper = true)
 public class UserDO extends BaseDO {
 
     /**

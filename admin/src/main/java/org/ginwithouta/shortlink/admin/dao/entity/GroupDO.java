@@ -10,12 +10,12 @@ import org.ginwithouta.shortlink.admin.common.database.BaseDO;
  * @Date : 2023 - 11月 - 周六
  * @Desc : 短链接分组实体
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-@TableName(value = "t_group")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@TableName(value = "t_group")
+@EqualsAndHashCode(callSuper = true)
 public class GroupDO extends BaseDO {
     /**
      * 短链接分组标识

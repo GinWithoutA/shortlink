@@ -23,12 +23,17 @@ public class GroupDO extends BaseDO {
     private String gid;
 
     /**
-     * 短链接名称
+     * 短链接分组名称
      */
     private String name;
 
     /**
-     * 创建分组的创建人
+     * 创建短链接分组的创建人
      */
     private String username;
+
+    /**
+     * 短链接分组排序
+     */
+    private Integer sortOrder;
 }

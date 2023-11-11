@@ -10,6 +10,7 @@ import org.ginwithouta.shortlink.admin.common.convention.exception.ClientExcepti
 import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
+import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
@@ -82,5 +83,18 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
             throw new ClientException(GROUP_DELETE_FAIL);
         }
         baseMapper.delete(queryWrapper);
+    }
+
+    @Override
+    public void sortGroup(List<ShortLinkGroupSortReqDTO> requestParams) {
+        requestParams.forEach(requestParam -> {
+            GroupDO groupDO = GroupDO.builder()
+                    .sortOrder(requestParam.getSortOrder())
+                    .build();
+            LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                    .eq(GroupDO::getUsername, UserContext.getUsername())
+                    .eq(GroupDO::getGid, requestParam.getGid());
+            baseMapper.update(groupDO, queryWrapper);
+        });
     }
 }

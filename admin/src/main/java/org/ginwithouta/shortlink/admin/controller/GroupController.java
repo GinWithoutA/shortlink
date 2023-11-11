@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
@@ -55,6 +56,15 @@ public class GroupController {
     @DeleteMapping(value = "group")
     public Result<Void> delete(@RequestParam String gid) {
         groupService.deleteGroup(gid);
+        return Results.success();
+    }
+
+    /**
+     * 删除短链接分组
+     */
+    @PostMapping(value = "group/sort")
+    public Result<Void> sort(@RequestBody List<ShortLinkGroupSortReqDTO> requestParams) {
+        groupService.sortGroup(requestParams);
         return Results.success();
     }
 }

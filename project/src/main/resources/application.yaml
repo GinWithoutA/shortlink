@@ -2,20 +2,20 @@ server:
   port: 8001
 spring:
   datasource:
-#    # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
-#    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-#    # shardingsphere 配置文件路径
-#    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
-      username: root
-      password: ginwithouta
-      url: jdbc:mysql://192.168.250.78:3306/link?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      hikari:
-        connection-test-query: select 1
-        connection-timeout: 20000
-        idle-timeout: 300000
-        maximum-pool-size: 5
-        minimum-idle: 5
+    # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    # shardingsphere 配置文件路径
+    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
+#      username: root
+#      password: ginwithouta
+#      url: jdbc:mysql://192.168.250.78:3306/link?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8
+#      driver-class-name: com.mysql.cj.jdbc.Driver
+#      hikari:
+#        connection-test-query: select 1
+#        connection-timeout: 20000
+#        idle-timeout: 300000
+#        maximum-pool-size: 5
+#        minimum-idle: 5
   data:
     redis:
       port: 6379

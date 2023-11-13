@@ -19,11 +19,6 @@ import org.ginwithouta.shortlink.admin.common.database.BaseDO;
 public class GroupDO extends BaseDO {
 
     /**
-     * id
-     */
-    private Long id;
-
-    /**
      * 短链接分组标识
      */
     private String gid;

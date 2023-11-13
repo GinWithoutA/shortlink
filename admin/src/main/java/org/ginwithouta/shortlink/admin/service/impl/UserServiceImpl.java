@@ -66,9 +66,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public void register(UserRegisterReqDTO requestParam) {
+        // 判断用户名是否重复
         if (hasUsername(requestParam.getUsername())) {
             throw new ClientException(USER_NAME_EXIST);
         }
+        // 防止缓存穿透，多个恶意线程同时请求同一个不存在的用户名，多个线程一起查数据库导致数据库崩溃，这里加锁
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
         try {
             if (lock.tryLock()) {

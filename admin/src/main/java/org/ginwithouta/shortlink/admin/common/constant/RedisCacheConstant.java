@@ -8,5 +8,5 @@ package org.ginwithouta.shortlink.admin.common.constant;
  */
 public class RedisCacheConstant {
 
-    public static final String LOCK_USER_REGISTER_KEY = "shor_link:lock_user_register";
+    public static final String LOCK_USER_REGISTER_KEY = "short-link:lock-user-register";
 }

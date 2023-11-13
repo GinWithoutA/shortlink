@@ -12,7 +12,7 @@ public class UserTableShardingTest {
             (
                 id            bigint auto_increment comment 'ID'
                 primary key,
-                username      varchar(250)         null comment '用户名',
+                username      varchar(256)         null comment '用户名',
                 password      varchar(512)         null comment '密码',
                 real_name     varchar(256)         null comment '真实姓名',
                 phone         varchar(128)         null comment '手机号',

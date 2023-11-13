@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.admin.common.database;
+package org.ginwithouta.shortlink.project.common.database;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;

@@ -6,7 +6,10 @@ import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+
+import java.util.List;
 
 /**
  * @Package : org.ginwithouta.shortlink.project.service
@@ -29,4 +32,11 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @return 短链接分页返回
      */
     IPage<ShortLinkPageRespDTO> pageShortLinkList(ShortLinkPageReqDTO requestParam);
+
+    /**
+     * 短链接分组数量查询
+     * @param requestParams 短链接分组数量查询入参
+     * @return 短链接分组数量
+     */
+    List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParams);
 }

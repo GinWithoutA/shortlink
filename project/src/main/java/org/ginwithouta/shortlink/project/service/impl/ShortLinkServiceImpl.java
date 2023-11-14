@@ -3,6 +3,7 @@ package org.ginwithouta.shortlink.project.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,12 +16,16 @@ import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkMapper;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.ginwithouta.shortlink.project.toolkit.HashUtil;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 
@@ -100,5 +105,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 throw new ClientException(SHORT_LINK_CREATE_SUFFIX_OVER_FLOW);
             }
         }
+    }
+
+    @Override
+    public List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParams) {
+        QueryWrapper<ShortLinkDO> queryWrapper = Wrappers.query(new ShortLinkDO()).select("gid, count(*) as shortLinkCount")
+                .in("gid", requestParams)
+                .eq("enable", 1)
+                .groupBy("gid");
+        List<Map<String, Object>> resultMap = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(resultMap, ShortLinkGroupCountQueryRespDTO.class);
     }
 }

@@ -8,9 +8,11 @@ import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,13 +23,15 @@ import java.util.Map;
  */
 public interface ShortLinkRemoteService {
 
+    String URL_PREFIX = "http://127.0.0.1:8001/api/short/link/project/v1/";
+
     /**
      * 远程调用创建短链接接口
      * @param requestParam 创建短链接入参
      * @return 短链接
      */
     default Result<ShortLinkCreateRespDTO> createShorLink(ShortLinkCreateReqDTO requestParam) {
-        String resultBodyStr = HttpUtil.post("http://127.0.0.1:8001/api/short/link/project/v1/link", JSON.toJSONString(requestParam));
+        String resultBodyStr = HttpUtil.post(URL_PREFIX + "link", JSON.toJSONString(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {
         });
     }
@@ -42,9 +46,20 @@ public interface ShortLinkRemoteService {
         requestMap.put("gid", requestParam.getGid());
         requestMap.put("current", requestParam.getCurrent());
         requestMap.put("size", requestParam.getSize());
-        String resultPage = HttpUtil.get("http://127.0.0.1:8001/api/short/link/project/v1/page", requestMap);
+        String resultPage = HttpUtil.get(URL_PREFIX + "page", requestMap);
         return JSON.parseObject(resultPage, new TypeReference<>() {
         });
     }
 
+    /**
+     * 短链接分组数量查询
+     * @param requestParams 短链接分组数量查询入参
+     * @return 短链接分组数量
+     */
+    default Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(List<String> requestParams) {
+        Map<String, Object> requestMap = new HashMap<>(1);
+        requestMap.put("requestParams", requestParams);
+        String resultPage = HttpUtil.get(URL_PREFIX + "count", requestMap);
+        return JSON.parseObject(resultPage, new TypeReference<>() {});
+    }
 }

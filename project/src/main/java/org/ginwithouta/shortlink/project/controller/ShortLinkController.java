@@ -7,9 +7,12 @@ import org.ginwithouta.shortlink.project.common.convention.result.Results;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * @Package : org.ginwithouta.shortlink.project.controller
@@ -38,5 +41,13 @@ public class ShortLinkController {
     @GetMapping(value = "page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
         return Results.success(shortLinkService.pageShortLinkList(requestParam));
+    }
+
+    /**
+     * 短链接分组数量查询
+     */
+    @GetMapping(value = "count")
+    public Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParams") List<String> requestParams) {
+        return Results.success(shortLinkService.listGroupShortLinkCount(requestParams));
     }
 }

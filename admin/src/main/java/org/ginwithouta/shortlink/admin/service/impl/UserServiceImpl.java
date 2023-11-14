@@ -18,6 +18,7 @@ import org.ginwithouta.shortlink.admin.dto.req.UserRegisterReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.UserUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.UserLoginRespDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.UserRespDTO;
+import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.service.UserService;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
@@ -46,6 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterCachePenetrationBloomFilter;
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
+    private final GroupService groupService;
     private static final String CACHE_LOGIN_PREFIX = "login-";
 
     @Override
@@ -71,7 +73,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (hasUsername(requestParam.getUsername())) {
             throw new ClientException(USER_NAME_EXIST);
         }
-        // 防止缓存穿透，多个恶意线程同时请求同一个不存在的用户名，多个线程一起查数据库导致数据库崩溃，这里加锁
+        // 防止缓存穿透，多个恶意线程同时请求同一个不存在的用户名，多个线程一起查数据库导致数据库崩溃，因此加锁
         RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
         try {
             if (lock.tryLock()) {
@@ -84,6 +86,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                     throw new ClientException(USER_EXIST);
                 }
                 userRegisterCachePenetrationBloomFilter.add(requestParam.getUsername());
+                groupService.saveGroup(requestParam.getUsername(), "默认分组");
                 return ;
             }
             throw new ClientException(USER_NAME_EXIST);

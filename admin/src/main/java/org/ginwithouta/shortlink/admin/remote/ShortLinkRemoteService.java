@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
@@ -32,8 +33,15 @@ public interface ShortLinkRemoteService {
      */
     default Result<ShortLinkCreateRespDTO> createShorLink(ShortLinkCreateReqDTO requestParam) {
         String resultBodyStr = HttpUtil.post(URL_PREFIX + "link", JSON.toJSONString(requestParam));
-        return JSON.parseObject(resultBodyStr, new TypeReference<>() {
-        });
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
+    }
+
+    /**
+     * 短链接修改
+     * @param requestParam 短链接修改入参
+     */
+    default void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        HttpUtil.post(URL_PREFIX + "update", JSON.toJSONString(requestParam));
     }
 
     /**
@@ -47,8 +55,7 @@ public interface ShortLinkRemoteService {
         requestMap.put("current", requestParam.getCurrent());
         requestMap.put("size", requestParam.getSize());
         String resultPage = HttpUtil.get(URL_PREFIX + "page", requestMap);
-        return JSON.parseObject(resultPage, new TypeReference<>() {
-        });
+        return JSON.parseObject(resultPage, new TypeReference<>() {});
     }
 
     /**

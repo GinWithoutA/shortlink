@@ -2,9 +2,11 @@ package org.ginwithouta.shortlink.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
+import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.remote.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
@@ -34,6 +36,15 @@ public class ShortLinkRemoteController {
     @PostMapping(value = "link")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return shortLinkRemoteService.createShorLink(requestParam);
+    }
+
+    /**
+     * 远程调用修改短链接
+     */
+    @PostMapping(value = "update")
+    public Result<Void> update(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+        shortLinkRemoteService.updateShortLink(requestParam);
+        return Results.success();
     }
 
     /**

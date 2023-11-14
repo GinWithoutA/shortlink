@@ -13,7 +13,8 @@ public enum ShortLinkErrorCodeEnums implements IErrorCode {
     SHORT_LINK_OPERATION_FAIL("B000300", "【短链接】操作失败"),
     SHORT_LINK_CREATE_FAIL("B000301", "【短链接】创建短链接失败"),
     SHORT_LINK_CREATE_SUFFIX_OVER_FLOW("B000302", "【短链接】创建短链接后缀失败：重复尝试次数太多"),
-    SHORT_LINK_BLOOM_FAIL("B000303", "【短链接】创建短链接失败：布隆过滤器误判，导致发生重复添加错误");
+    SHORT_LINK_BLOOM_FAIL("B000303", "【短链接】创建短链接失败：布隆过滤器误判，导致发生重复添加错误"),
+    SHORT_LINK_NOT_EXIST("B000304", "【短链接】操作短链接失败，该短链接不存在");
     private final String code;
 
     private final String message;

@@ -64,11 +64,11 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(GroupDO::getSortOrder, BaseDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
+        List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOs = BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
         Result<List<ShortLinkGroupCountQueryRespDTO>> listResult
                 = shortLinkRemoteService.listGroupShortLinkCount(groupDOList.stream()
-                .map(GroupDO::getGid)
-                .collect(Collectors.toList()));
-        List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOs = BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
+                    .map(GroupDO::getGid)
+                    .collect(Collectors.toList()));
         shortLinkGroupRespDTOs.forEach(each -> {
             Optional<ShortLinkGroupCountQueryRespDTO> shortLinkGroupCountQueryRespDTO = listResult.getData().stream()
                     .filter(item -> Objects.equals(item.getGid(), each.getGid()))

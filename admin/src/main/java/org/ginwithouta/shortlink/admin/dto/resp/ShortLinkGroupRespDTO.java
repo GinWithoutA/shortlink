@@ -21,11 +21,6 @@ public class ShortLinkGroupRespDTO {
     private String name;
 
     /**
-     * 创建短链接分组的创建人
-     */
-    private String username;
-
-    /**
      * 短链接分组排序
      */
     private Integer sortOrder;

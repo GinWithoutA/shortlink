@@ -1,15 +1,15 @@
 package org.ginwithouta.shortlink.project.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @Package : org.ginwithouta.shortlink.project.controller
@@ -24,8 +24,19 @@ public class ShortLinkController {
 
     private final ShortLinkService shortLinkService;
 
+    /**
+     * 创建短链接
+     */
     @PostMapping(value = "link")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return Results.success(shortLinkService.createShorLink(requestParam));
+    }
+
+    /**
+     * 分页查询短链接
+     */
+    @GetMapping(value = "page")
+    public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
+        return Results.success(shortLinkService.pageShortLinkList(requestParam));
     }
 }

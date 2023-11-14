@@ -2,6 +2,9 @@ package org.ginwithouta.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +13,9 @@ import org.ginwithouta.shortlink.project.common.convention.exception.ServiceExce
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
 import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkMapper;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.ginwithouta.shortlink.project.toolkit.HashUtil;
 import org.redisson.api.RBloomFilter;
@@ -42,7 +47,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .append(shortLinkSuffix)
                 .toString();
         ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
-        shortLinkDO.setFullShortUrl(fullShortLinkUrl).setShortUri(shortLinkSuffix);
+        shortLinkDO.setFullShortUrl(fullShortLinkUrl);
+        shortLinkDO.setShortUri(shortLinkSuffix);
         try {
             int inserted = baseMapper.insert(shortLinkDO);
             if (inserted < 1) {
@@ -59,6 +65,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .originUrl(shortLinkDO.getOriginUrl())
                 .gid(requestParam.getGid())
                 .build();
+    }
+
+    @Override
+    public IPage<ShortLinkPageRespDTO> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
+        LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnable, 1);
+        IPage<ShortLinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
+        return resultPage.convert(each -> BeanUtil.toBean(each, ShortLinkPageRespDTO.class));
     }
 
     /**

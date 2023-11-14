@@ -1,24 +1,23 @@
-package org.ginwithouta.shortlink.project.dao.entity;
+package org.ginwithouta.shortlink.project.dto.resp;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.*;
-import org.ginwithouta.shortlink.project.common.database.BaseDO;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
 /**
- * @Package : org.ginwithouta.shortlink.project.dao.entity
+ * @Package : org.ginwithouta.shortlink.project.dto.resp
  * @Author : NONO Wang
  * @Date : 2023 - 11月 - 周一
- * @Desc : 短链接实体
+ * @Desc : 分页返回参数
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@TableName("t_link")
-@EqualsAndHashCode(callSuper = true)
-public class ShortLinkDO extends BaseDO {
+public class ShortLinkPageRespDTO {
+
+    /**
+     * ID
+     */
+    private Long id;
 
     /**
      * 域名
@@ -41,11 +40,6 @@ public class ShortLinkDO extends BaseDO {
     private String originUrl;
 
     /**
-     * 点击量
-     */
-    private Integer clickNum;
-
-    /**
      * 分组标识
      */
     private String gid;
@@ -56,16 +50,6 @@ public class ShortLinkDO extends BaseDO {
     private String favicon;
 
     /**
-     * 短链接启用标识 0 未启用 1 已启用
-     */
-    private Integer enable;
-
-    /**
-     * 创建类型 0 接口创建 1 平台创建
-     */
-    private Integer createdType;
-
-    /**
      * 有效期类型 0 永久有效 1 临时有效
      */
     private Integer validDateType;
@@ -73,6 +57,7 @@ public class ShortLinkDO extends BaseDO {
     /**
      * 有效期
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime validDate;
 
     /**
@@ -80,4 +65,9 @@ public class ShortLinkDO extends BaseDO {
      */
     private String description;
 
+    /**
+     * 创建时间
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private LocalDateTime createTime;
 }

@@ -49,6 +49,7 @@ public class UserTransmitFilter implements Filter {
                 String username = httpServletRequest.getHeader("username");
                 String token = httpServletRequest.getHeader("token");
                 if (!StrUtil.isAllNotBlank(username, token)) {
+                    // TODO 全局异常捕捉是捕捉不到Filter中的异常的，Filter的处理是在Controller之前的，因此无法捕捉到
                     throw new ClientException(USER_TOKEN_CHECK_FAIL);
                 }
                 Object userInfoJsonStr;

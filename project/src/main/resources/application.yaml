@@ -5,7 +5,7 @@ spring:
     # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     # shardingsphere 配置文件路径
-    url: jdbc:shardingsphere:classpath:shardingsphere-config.yaml
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
 #      username: root
 #      password: ginwithouta
 #      url: jdbc:mysql://192.168.250.78:3306/link?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8

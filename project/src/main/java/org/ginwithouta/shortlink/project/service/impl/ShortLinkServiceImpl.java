@@ -2,6 +2,7 @@ package org.ginwithouta.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -29,7 +30,10 @@ import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.ginwithouta.shortlink.project.toolkit.HashUtil;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +41,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 
@@ -53,6 +59,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
     private final ShortLinkGoToMapper shortLinkGoToMapper;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RedissonClient redissonClient;
 
     private static final int MAX_GENERATE_TIMES = 100;
     /**
@@ -175,20 +183,42 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     public void redirectUrl(String shortUri, ServletRequest request, ServletResponse response) {
         String serverName = DOMAIN_PREFIX + request.getServerName();
         String fullShortUrl = StrBuilder.create(serverName).append("/").append(shortUri).toString();
-        LambdaQueryWrapper<ShortLinkGoToDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
-                .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-        ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
-        if (shortLinkGoToDO == null) {
-            // TODO 此处需要进行风控，照理说不能直接return
-            return;
-        }
-        LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                .eq(ShortLinkDO::getGid, shortLinkGoToDO.getGid())
-                .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
-                .eq(ShortLinkDO::getEnable, 1);
-        ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
-        if (shortLinkDO != null) {
-            ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
+        // 查缓存
+        String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+        if (StrUtil.isBlank(originLink)) {
+            // 加锁
+            RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
+            lock.lock();
+            try {
+                // 防止所有线程都来执行一边下面的流程，双重检锁
+                originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+                if (StrUtil.isNotBlank(originLink)) {
+                    ((HttpServletResponse) response).sendRedirect(originLink);
+                    return ;
+                }
+                // 先查路由表
+                LambdaQueryWrapper<ShortLinkGoToDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
+                        .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
+                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
+                if (shortLinkGoToDO == null) {
+                    // TODO 此处需要进行风控，照理说不能直接return
+                    return;
+                }
+                // 再查短链接表
+                LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                        .eq(ShortLinkDO::getGid, shortLinkGoToDO.getGid())
+                        .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
+                        .eq(ShortLinkDO::getEnable, 1);
+                ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
+                if (shortLinkDO != null) {
+                    stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDO.getOriginUrl());
+                    ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
+                }
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            ((HttpServletResponse) response).sendRedirect(originLink);
         }
     }
 }

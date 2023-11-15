@@ -8,7 +8,7 @@ spring:
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
 #    username: root
 #    password: ginwithouta
-#    url: jdbc:mysql://192.168.250.78:3306/link?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8
+#    url: jdbc:mysql://172.23.236.240:3306/link?characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&serverTimezone=GMT%2B8
 #    driver-class-name: com.mysql.cj.jdbc.Driver
 #    hikari:
 #      connection-test-query: select 1

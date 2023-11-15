@@ -31,9 +31,20 @@ public class ShortLinkTableShardingTest {
                 unique (full_short_url) comment '短链接唯一索引'
         );""";
 
+    public static final String GOTO_SQL = """
+            create table t_link_goto_%d
+            (
+                id             bigint auto_increment comment 'ID'
+                    primary key,
+                gid            varchar(32) default 'default' null comment '短链接分组标识',
+                full_short_url varchar(128)                  null comment '完整短链接'
+            )
+                comment '短链接和分组标识路由表';
+            """;
+
     public static void main(String[] args) {
         for (int i = 0; i < 16; ++i) {
-            System.out.printf(SQL, i);
+            System.out.printf(GOTO_SQL, i);
         }
     }
 }

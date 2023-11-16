@@ -40,9 +40,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 
@@ -183,42 +183,53 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     public void redirectUrl(String shortUri, ServletRequest request, ServletResponse response) {
         String serverName = DOMAIN_PREFIX + request.getServerName();
         String fullShortUrl = StrBuilder.create(serverName).append("/").append(shortUri).toString();
-        // 查缓存
+        // 先查缓存，如果有就直接返回
         String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-        if (StrUtil.isBlank(originLink)) {
-            // 加锁
-            RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
-            lock.lock();
-            try {
-                // 防止所有线程都来执行一边下面的流程，双重检锁
-                originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
-                if (StrUtil.isNotBlank(originLink)) {
-                    ((HttpServletResponse) response).sendRedirect(originLink);
-                    return ;
-                }
-                // 先查路由表
-                LambdaQueryWrapper<ShortLinkGoToDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
-                        .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
-                if (shortLinkGoToDO == null) {
-                    // TODO 此处需要进行风控，照理说不能直接return
-                    return;
-                }
-                // 再查短链接表
-                LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                        .eq(ShortLinkDO::getGid, shortLinkGoToDO.getGid())
-                        .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
-                        .eq(ShortLinkDO::getEnable, 1);
-                ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
-                if (shortLinkDO != null) {
-                    stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDO.getOriginUrl());
-                    ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
-                }
-            } finally {
-                lock.unlock();
-            }
-        } else {
+        if (StrUtil.isNotBlank(originLink)) {
             ((HttpServletResponse) response).sendRedirect(originLink);
+            return ;
+        }
+        // 查询第一层布隆过滤器，查询当前请求的 fullShortLink 是否存在，如果不存在，表明数据库中不存在，直接返回
+        if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
+            return;
+        }
+        // 如果上面的布隆过滤器中存在，查询第二层布隆过滤器，如果存在值，说明是误判，直接返回
+        String gotoIsNullShortLinkKey = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
+        if (StrUtil.isNotBlank(gotoIsNullShortLinkKey)) {
+            return ;
+        }
+        // 前面都通过了，正常执行后续业务流程
+        // 加锁
+        RLock lock = redissonClient.getLock(String.format(LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
+        lock.lock();
+        try {
+            // 防止所有线程都来执行一边下面的流程，双重检锁
+            originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
+            if (StrUtil.isNotBlank(originLink)) {
+                ((HttpServletResponse) response).sendRedirect(originLink);
+                return ;
+            }
+            // 先查路由表
+            LambdaQueryWrapper<ShortLinkGoToDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
+                    .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
+            ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
+            if (shortLinkGoToDO == null) {
+                // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层布隆过滤器中
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                return;
+            }
+            // 再查短链接表
+            LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                    .eq(ShortLinkDO::getGid, shortLinkGoToDO.getGid())
+                    .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
+                    .eq(ShortLinkDO::getEnable, 1);
+            ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
+            if (shortLinkDO != null) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDO.getOriginUrl());
+                ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
+            }
+        } finally {
+            lock.unlock();
         }
     }
 }

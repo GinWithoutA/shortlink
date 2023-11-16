@@ -21,6 +21,10 @@ spring:
       port: 6379
       host: localhost
       password: 123456
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .html
 mybatis-plus:
   global-config:
     db-config:

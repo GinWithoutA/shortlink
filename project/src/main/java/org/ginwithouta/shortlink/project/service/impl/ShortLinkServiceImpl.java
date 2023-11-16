@@ -44,6 +44,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.DOMAIN_PREFIX;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.REDIRECT_TO_NOT_FOUND_URI;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheValidDate;
@@ -65,10 +67,6 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final RedissonClient redissonClient;
 
     private static final int MAX_GENERATE_TIMES = 100;
-    /**
-     * TODO 临时拼接 domain 后续看怎么进行修改
-     */
-    private static final String DOMAIN_PREFIX = "http://";
 
     @Override
     public ShortLinkCreateRespDTO createShorLink(ShortLinkCreateReqDTO requestParam) {
@@ -197,13 +195,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ((HttpServletResponse) response).sendRedirect(originLink);
             return ;
         }
-        // 查询第一层布隆过滤器，查询当前请求的 fullShortLink 是否存在，如果不存在，表明数据库中不存在，直接返回
+        // 查询第一层布隆过滤器，查询当前请求的 fullShortLink 是否存在，如果不存在，表明数据库中不存在，直接重定向到不存在页面
         if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
+            ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
             return;
         }
         // 如果上面的布隆过滤器中存在，查询第二层布隆过滤器，如果存在值，说明是误判，直接返回
         String gotoIsNullShortLinkKey = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLinkKey)) {
+            ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
             return ;
         }
         // 前面都通过了，正常执行后续业务流程
@@ -222,8 +222,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
             ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
             if (shortLinkGoToDO == null) {
-                // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层布隆过滤器中
+                // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层空值布隆过滤器中
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
                 return;
             }
             // 再查短链接表
@@ -232,19 +233,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
                     .eq(ShortLinkDO::getEnable, 1);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
-            if (shortLinkDO != null) {
-                if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().isBefore(LocalDateTime.now())) {
-                    // 查询数据库中发现存在，并且已经过期，将当前的 fullShortLink 加到第二层布隆过滤器中
-                    stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
-                    return;
-                }
-                stringRedisTemplate.opsForValue().set(
-                        String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
-                        shortLinkDO.getOriginUrl(),
-                        getLinkCacheValidDate(shortLinkDO.getValidDate()),
-                        TimeUnit.MILLISECONDS);
-                ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
+            if (shortLinkDO == null) {
+                throw new ClientException(SHORT_LINK_NOT_EXIST);
             }
+            if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().isBefore(LocalDateTime.now())) {
+                // 查询数据库中发现存在，并且已经过期，将当前的 fullShortLink 加到第二层布隆过滤器中
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
+                return;
+            }
+            stringRedisTemplate.opsForValue().set(
+                    String.format(GOTO_SHORT_LINK_KEY, fullShortUrl),
+                    shortLinkDO.getOriginUrl(),
+                    getLinkCacheValidDate(shortLinkDO.getValidDate()),
+                    TimeUnit.MILLISECONDS);
+            ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }

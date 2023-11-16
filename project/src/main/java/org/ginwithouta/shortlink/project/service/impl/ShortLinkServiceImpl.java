@@ -45,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
+import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheValidDate;
 
 /**
  * @Package : org.ginwithouta.shortlink.project.service.impl
@@ -94,6 +95,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             log.warn("短链接：并发异常，{} 重复入库", fullShortLinkUrl);
             throw new ServiceException(SHORT_LINK_BLOOM_FAIL);
         }
+        // 创建的短链接直接放到 Redis 缓存中
+        stringRedisTemplate.opsForValue().set(
+                String.format(GOTO_SHORT_LINK_KEY, fullShortLinkUrl),
+                requestParam.getOriginUrl(),
+                getLinkCacheValidDate(requestParam.getValidDate()),
+                TimeUnit.MILLISECONDS);
         shortUriCreateCachePenetrationBloomFilter.add(fullShortLinkUrl);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl(shortLinkDO.getFullShortUrl())

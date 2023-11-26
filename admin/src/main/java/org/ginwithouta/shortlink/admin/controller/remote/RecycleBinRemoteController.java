@@ -1,20 +1,20 @@
 package org.ginwithouta.shortlink.admin.controller.remote;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.remote.RecycleBinRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Ginwithouta
  * Generate at 2023/11/26
  */
 @RestController
-@RequestMapping(value = "/api/short/link/recycle/bin/v1/")
+@RequestMapping(value = "/api/short/link/admin/recycle/bin/v1/")
 public class RecycleBinRemoteController {
 
     /**
@@ -30,5 +30,13 @@ public class RecycleBinRemoteController {
     public Result<Void> saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam) {
         recycleBinRemoteService.saveRecycleBin(requestParam);
         return Results.success();
+    }
+
+    /**
+     * HTTP请求远程调用分页查询回收站短链接
+     */
+    @GetMapping(value = "page")
+    public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(ShortLinkPageReqDTO requestParam) {
+        return recycleBinRemoteService.pageRecycleBinList(requestParam);
     }
 }

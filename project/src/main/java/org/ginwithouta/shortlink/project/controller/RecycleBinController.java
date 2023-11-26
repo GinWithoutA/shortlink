@@ -1,14 +1,14 @@
 package org.ginwithouta.shortlink.project.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
 import org.ginwithouta.shortlink.project.dto.req.RecycleBinSaveReqDTO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.RecycleBinService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * @author Ginwithouta
@@ -29,5 +29,13 @@ public class RecycleBinController {
     public Result<Void> saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam) {
         recycleBinService.save(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 分页查询回收站短链接
+     */
+    @GetMapping(value = "page")
+    public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
+        return Results.success(recycleBinService.pageRecycleBinList(requestParam));
     }
 }

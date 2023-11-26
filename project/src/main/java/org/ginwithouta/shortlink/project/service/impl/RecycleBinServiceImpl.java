@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
 import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkMapper;
 import org.ginwithouta.shortlink.project.dto.req.RecycleBinPageReqDTO;
+import org.ginwithouta.shortlink.project.dto.req.RecycleBinRemoveReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.RecycleBinRestoreReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.RecycleBinSaveReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -70,5 +71,14 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
         /*
          * 这里可以不用做缓存的预热，一个从回收站中移除的短链接一边来说不会有太大的访问量，可以直接使用缓存击穿的方式来进行处理
          */
+    }
+
+    @Override
+    public void remove(RecycleBinRemoveReqDTO requestParam) {
+        LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnable, 0);
+        baseMapper.delete(queryWrapper);
     }
 }

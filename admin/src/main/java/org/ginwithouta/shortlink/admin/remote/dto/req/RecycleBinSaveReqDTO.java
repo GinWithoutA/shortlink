@@ -5,7 +5,7 @@ import lombok.Data;
 /**
  * @author Ginwithouta
  * Generate at 2023/11/26
- * 回收站保存保存功能请求DTO
+ * 将短链接移入回收站请求入参DTO
  */
 @Data
 public class RecycleBinSaveReqDTO {

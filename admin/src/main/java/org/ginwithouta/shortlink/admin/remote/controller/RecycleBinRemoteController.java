@@ -1,13 +1,14 @@
-package org.ginwithouta.shortlink.admin.controller.remote;
+package org.ginwithouta.shortlink.admin.remote.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
-import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinPageReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRestoreReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -40,5 +41,14 @@ public class RecycleBinRemoteController {
     @GetMapping(value = "page")
     public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam) {
         return recycleBinRemoteService.pageRecycleBinList(requestParam);
+    }
+
+    /**
+     * 恢复短链接，将短链接从回收站中移除
+     */
+    @PostMapping(value = "restore")
+    public Result<Void> restoreRecycleBin(@RequestBody RecycleBinRestoreReqDTO requestParam) {
+        recycleBinRemoteService.restoreRecycleBin(requestParam);
+        return Results.success();
     }
 }

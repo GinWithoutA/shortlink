@@ -1,14 +1,14 @@
-package org.ginwithouta.shortlink.project.dto.req;
+package org.ginwithouta.shortlink.admin.remote.dto.req;
 
 import lombok.Data;
 
 /**
  * @author Ginwithouta
  * Generate at 2023/11/26
- * 将短链接移动至回收站请求DTO
+ * 从回收站移除短链接请求DTO
  */
 @Data
-public class RecycleBinSaveReqDTO {
+public class RecycleBinRestoreReqDTO {
 
     /**
      * 分组标识

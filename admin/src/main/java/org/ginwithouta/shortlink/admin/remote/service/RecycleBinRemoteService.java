@@ -5,8 +5,10 @@ import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinPageReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRestoreReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * @author Ginwithouta
@@ -30,4 +32,12 @@ public interface RecycleBinRemoteService {
      * @return 分页查询结果
      */
     Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam);
+
+    /**
+     * 恢复短链接，将短链接从回收站中移除
+     * @param requestParam 恢复短链接请求入参
+     */
+    default void restoreRecycleBin(@RequestBody RecycleBinRestoreReqDTO requestParam) {
+        HttpUtil.post(URL_PREFIX + "restore", JSON.toJSONString(requestParam));
+    }
 }

@@ -1,16 +1,12 @@
-package org.ginwithouta.shortlink.admin.remote;
+package org.ginwithouta.shortlink.admin.remote.service;
 
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
+import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Ginwithouta
@@ -30,15 +26,8 @@ public interface RecycleBinRemoteService {
 
     /**
      * 远程调用分页查询回收站短链接
-     * @param requestParam 分页查询入参
+     * @param requestParam 分页查询入参，入参中没有包含 gidLists
      * @return 分页查询结果
      */
-    default Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(ShortLinkPageReqDTO requestParam) {
-        Map<String, Object> requestMap = new HashMap<>(3);
-        requestMap.put("gid", requestParam.getGid());
-        requestMap.put("current", requestParam.getCurrent());
-        requestMap.put("size", requestParam.getSize());
-        String resultPage = HttpUtil.get(URL_PREFIX + "page", requestMap);
-        return JSON.parseObject(resultPage, new TypeReference<>() {});
-    }
+    Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam);
 }

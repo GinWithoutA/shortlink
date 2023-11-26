@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.admin.remote;
+package org.ginwithouta.shortlink.admin.remote.service;
 
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;

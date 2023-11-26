@@ -14,7 +14,7 @@ import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
-import org.ginwithouta.shortlink.admin.remote.ShortLinkRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;

@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
+import org.ginwithouta.shortlink.project.dto.req.RecycleBinPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.RecycleBinSaveReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.RecycleBinService;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +35,7 @@ public class RecycleBinController {
      * 分页查询回收站短链接
      */
     @GetMapping(value = "page")
-    public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
+    public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(RecycleBinPageReqDTO requestParam) {
         return Results.success(recycleBinService.pageRecycleBinList(requestParam));
     }
 }

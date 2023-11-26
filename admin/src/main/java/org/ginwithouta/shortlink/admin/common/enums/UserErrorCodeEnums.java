@@ -17,7 +17,9 @@ public enum UserErrorCodeEnums implements IErrorCode {
     USER_SAVE_ERROR("B000203", "用户记录新增失败"),
     USER_LOGIN_ERROR("B000204", "用户名或密码错误"),
     USER_ALREADY_LOGIN("B000205", "用户已登录"),
-    USER_NOT_LOGIN("B000206", "用户未登录");
+    USER_NOT_LOGIN("B000206", "用户未登录"),
+    USER_INFO_ERROR("A000210", "用户信息存在异常"),
+    USER_INFO_GROUP_EMPTY("A000211", "当前用户没有分组信息");
 
     private final String code;
 

@@ -3,7 +3,7 @@ package org.ginwithouta.shortlink.admin.controller.remote;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
-import org.ginwithouta.shortlink.admin.remote.ShortLinkRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;

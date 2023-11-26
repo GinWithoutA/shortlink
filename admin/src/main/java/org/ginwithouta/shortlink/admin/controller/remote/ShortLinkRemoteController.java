@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.admin.controller;
+package org.ginwithouta.shortlink.admin.controller.remote;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;

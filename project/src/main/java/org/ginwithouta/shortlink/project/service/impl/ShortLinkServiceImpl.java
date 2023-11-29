@@ -2,7 +2,9 @@ package org.ginwithouta.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.lang.UUID;
 import cn.hutool.core.text.StrBuilder;
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,6 +14,8 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -46,11 +50,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.DOMAIN_PREFIX;
@@ -298,7 +300,36 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
      * @param gid           短链接分组标识
      */
     private void shortLinkStatistics(String fullShortUrl, String gid, ServletRequest request, ServletResponse response) {
+        AtomicBoolean uvEmptyFlag = new AtomicBoolean();
+        Cookie[] cookies = ((HttpServletRequest) request).getCookies();
         try {
+            // 利用 Runnable 的 run 方法由当前线程执行内部的内容，相当于分离了一个方法出来
+            Runnable addResponseCookieTask = () -> {
+                // 当前名称 uv 的 Cookie 不存在，或者当前不存在 Cookie
+                // 利用 Cookie 来判断是否是同一用户访问，该 Cookie 的保存时间为 1 个月
+                String uvFlag = UUID.fastUUID().toString();
+                Cookie uvCookie = new Cookie("uv", uvFlag);
+                uvCookie.setMaxAge(60 * 60 * 24 * 30);
+                uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.lastIndexOf("/"), fullShortUrl.length()));
+                ((HttpServletResponse) response).addCookie(uvCookie);
+                // TODO 这种直接存 redis 的方式涉及到要存多久，短链接越来越多的时候，很可能发生影响，后续重构要进行修改
+                stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, uvFlag);
+                uvEmptyFlag.set(true);
+            };
+            if (ArrayUtil.isNotEmpty(cookies)) {
+                Arrays.stream(cookies)
+                        .filter(each -> Objects.equals(each.getName(), "uv"))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .ifPresentOrElse(each -> {
+                            // 当前名称 uv 的 Cookie 存在，判断当前用户 each 是否之前访问过该短链接
+                            Long added = stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, each);
+                            uvEmptyFlag.set(added != null && added > 0);
+                        }, addResponseCookieTask);
+
+            } else {
+                addResponseCookieTask.run();
+            }
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
                         .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
@@ -309,7 +340,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             int hour = DateUtil.hour(new Date(), true);
             ShortLinkStatisticsDO statisticsDO = ShortLinkStatisticsDO.builder()
                     .pv(1)
-                    .uv(1)
+                    .uv(uvEmptyFlag.get() ? 1 : 0)
                     .uip(1)
                     .hour(hour)
                     .weekday(week)

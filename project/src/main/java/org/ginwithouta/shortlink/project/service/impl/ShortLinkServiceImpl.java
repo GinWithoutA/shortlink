@@ -36,6 +36,7 @@ import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDT
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.ginwithouta.shortlink.project.toolkit.HashUtil;
+import org.ginwithouta.shortlink.project.toolkit.HttpUtil;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -55,8 +56,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
-import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.DOMAIN_PREFIX;
-import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.REDIRECT_TO_NOT_FOUND_URI;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.*;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheValidDate;
@@ -323,13 +323,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .map(Cookie::getValue)
                         .ifPresentOrElse(each -> {
                             // 当前名称 uv 的 Cookie 存在，判断当前用户 each 是否之前访问过该短链接
-                            Long added = stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, each);
-                            uvEmptyFlag.set(added != null && added > 0);
+                            Long uvAdded = stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, each);
+                            uvEmptyFlag.set(uvAdded != null && uvAdded > 0);
                         }, addResponseCookieTask);
 
             } else {
                 addResponseCookieTask.run();
             }
+            String remoteAddr = HttpUtil.getRealIp((HttpServletRequest) request);
+            // TODO 和前面的 UV 一样的问题，如何保证大数据量不会将内存撑爆
+            Long uipAdded = stringRedisTemplate.opsForSet().add("short-link:statistics:uip:" + fullShortUrl, remoteAddr);
+            boolean uipEmptyFlag = uipAdded != null && uipAdded > 0;
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
                         .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
@@ -341,7 +345,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ShortLinkStatisticsDO statisticsDO = ShortLinkStatisticsDO.builder()
                     .pv(1)
                     .uv(uvEmptyFlag.get() ? 1 : 0)
-                    .uip(1)
+                    .uip(uipEmptyFlag ? 1 : 0)
                     .hour(hour)
                     .weekday(week)
                     .fullShortUrl(fullShortUrl)

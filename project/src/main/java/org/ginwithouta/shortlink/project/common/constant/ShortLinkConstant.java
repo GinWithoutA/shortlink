@@ -21,4 +21,9 @@ public class ShortLinkConstant {
      * 短链接 Domain 前缀
      */
     public static final String DOMAIN_PREFIX = "http://";
+
+    /**
+     * 用户真实 IP 地址默认值
+     */
+    public static final String USER_REAL_IP_DEFAULT = "unknown";
 }

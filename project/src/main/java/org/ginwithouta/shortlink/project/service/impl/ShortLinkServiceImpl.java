@@ -1,6 +1,7 @@
 package org.ginwithouta.shortlink.project.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.StrBuilder;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -19,8 +20,10 @@ import org.ginwithouta.shortlink.project.common.convention.exception.ClientExcep
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkGoToDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkGoToMapper;
 import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkMapper;
+import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkStatisticsMapper;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -43,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -66,10 +70,11 @@ import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheVal
 @RequiredArgsConstructor
 public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLinkDO> implements ShortLinkService {
 
-    private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
+    private final RedissonClient redissonClient;
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final StringRedisTemplate stringRedisTemplate;
-    private final RedissonClient redissonClient;
+    private final ShortLinkStatisticsMapper shortLinkStatisticsMapper;
+    private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
 
     private static final int MAX_GENERATE_TIMES = 100;
 
@@ -219,6 +224,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         // 先查缓存，如果有就直接返回
         String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originLink)) {
+            // 跳转前完成对应短链接的统计
+            // TODO 加上gid
+            shortLinkStatistics(fullShortUrl, null, request, response);
             ((HttpServletResponse) response).sendRedirect(originLink);
             return ;
         }
@@ -241,6 +249,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             // 防止所有线程都来执行一边下面的流程，双重检锁
             originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originLink)) {
+                // 跳转前完成对应短链接的统计
+                // TODO 加上gid
+                shortLinkStatistics(fullShortUrl, null, request, response);
                 ((HttpServletResponse) response).sendRedirect(originLink);
                 return ;
             }
@@ -271,9 +282,44 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     shortLinkDO.getOriginUrl(),
                     getLinkCacheValidDate(shortLinkDO.getValidDate()),
                     TimeUnit.MILLISECONDS);
+            // 跳转前完成对应短链接的统计
+            shortLinkStatistics(fullShortUrl, shortLinkDO.getGid(), request, response);
             ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
             lock.unlock();
+        }
+    }
+
+    /**
+     * 短链接跳转时完成对应对链接的统计
+     * @param request       请求
+     * @param response      响应
+     * @param fullShortUrl  完整短链接
+     * @param gid           短链接分组标识
+     */
+    private void shortLinkStatistics(String fullShortUrl, String gid, ServletRequest request, ServletResponse response) {
+        try {
+            if (StrUtil.isBlank(gid)) {
+                LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
+                        .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
+                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(queryWrapper);
+                gid = shortLinkGoToDO.getGid();
+            }
+            int week = DateUtil.dayOfWeekEnum(new Date()).getIso8601Value();
+            int hour = DateUtil.hour(new Date(), true);
+            ShortLinkStatisticsDO statisticsDO = ShortLinkStatisticsDO.builder()
+                    .pv(1)
+                    .uv(1)
+                    .uip(1)
+                    .hour(hour)
+                    .weekday(week)
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkStatisticsMapper.shortLinkStatistics(statisticsDO);
+        } catch (Throwable e) {
+            log.error("短链接跳转失败", e);
         }
     }
 }

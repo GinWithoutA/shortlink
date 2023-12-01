@@ -25,14 +25,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.common.convention.exception.ClientException;
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkGoToDO;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatisticsDO;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkGoToMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkLocaleStatisticsMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkStatisticsMapper;
+import org.ginwithouta.shortlink.project.dao.entity.*;
+import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
@@ -82,6 +76,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final ShortLinkStatisticsMapper shortLinkStatisticsMapper;
+    private final ShortLinkOsStatisticsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
     private final ShortLinkLocaleStatisticsMapper shortLinkLocaleStatisticsMapper;
 
@@ -371,7 +366,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             String localeResultStr = HttpUtil.get(AMAP_REMOTE_URL, localeParamMap);
             JSONObject localeResultObj = JSON.parseObject(localeResultStr);
             String infocode = localeResultObj.getString("infocode");
-            ShortLinkLocaleStatisticsDO localeStatisticsDO = null;
+            ShortLinkLocaleStatisticsDO localeStatisticsDO;
             if (StrUtil.isNotBlank(infocode) && StrUtil.equals(infocode, "10000")) {
                 String province = localeResultObj.getString("province");
                 boolean unknownFlag = StrUtil.equals(province, "[]");
@@ -384,8 +379,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .gid(gid)
                         .date(new Date())
                         .build();
+                shortLinkLocaleStatisticsMapper.shortLinkLocaleStatistics(localeStatisticsDO);
             }
-            shortLinkLocaleStatisticsMapper.shortLinkLocaleStatistics(localeStatisticsDO);
+            // 操作系统访问统计
+            ShortLinkOsStatisticsDO shortLinkOsStatisticsDO = ShortLinkOsStatisticsDO.builder()
+                    .os(LinkUtil.getOs((HttpServletRequest) request))
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkOsStatisticsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

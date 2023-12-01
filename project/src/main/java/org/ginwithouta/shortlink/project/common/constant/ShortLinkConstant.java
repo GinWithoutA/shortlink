@@ -26,4 +26,9 @@ public class ShortLinkConstant {
      * 用户真实 IP 地址默认值
      */
     public static final String USER_REAL_IP_DEFAULT = "unknown";
+
+    /**
+     * 高德 API 访问路径：根据用户 IP 获取用户所在地区
+     */
+    public static final String AMAP_REMOTE_URL = "https://restapi.amap.com/v3/ip";
 }

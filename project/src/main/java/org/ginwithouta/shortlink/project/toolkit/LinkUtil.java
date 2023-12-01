@@ -99,4 +99,30 @@ public class LinkUtil {
             return "Unknown";
         }
     }
+
+    /**
+     * 获取用户访问的浏览器
+     * @param request 请求
+     * @return  访问的浏览器
+     */
+    public static String getBrowser(HttpServletRequest request) {
+        String userAgent = request.getHeader("User-Agent");
+        // 有个小 BUG ，EDGE 浏览器会显示 Edg，以及 Chrome 还有 Safari
+        // Chrome 会显示 Safari ，所以把这个放到上面来
+        if (userAgent.toLowerCase().contains("edg")) {
+            return "Microsoft Edge";
+        } else if (userAgent.toLowerCase().contains("chrome")) {
+            return "Google Chrome";
+        } else if (userAgent.toLowerCase().contains("firefox")) {
+            return "Mozilla Firefox";
+        } else if (userAgent.toLowerCase().contains("safari")) {
+            return "Apple Safari";
+        } else if (userAgent.toLowerCase().contains("opera")) {
+            return "Opera";
+        } else if (userAgent.toLowerCase().contains("msie")) {
+            return "Internet Explorer";
+        } else {
+            return "Unknown";
+        }
+    }
 }

@@ -79,6 +79,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkOsStatisticsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
     private final ShortLinkLocaleStatisticsMapper shortLinkLocaleStatisticsMapper;
+    private final ShortLinkBrowserStatisticsMapper shortLinkBrowserStatisticsMapper;
 
     @Value("${short-link.statistics.locale.amap-key}")
     private String statisticsLocaleAmapKey;
@@ -390,6 +391,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             shortLinkOsStatisticsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
+            // 浏览器访问统计
+            ShortLinkBrowserStatisticsDO shortLinkBrowserStatisticsDO = ShortLinkBrowserStatisticsDO.builder()
+                    .browser(LinkUtil.getBrowser((HttpServletRequest) request))
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkBrowserStatisticsMapper.shortLinkBrowserStatistics(shortLinkBrowserStatisticsDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

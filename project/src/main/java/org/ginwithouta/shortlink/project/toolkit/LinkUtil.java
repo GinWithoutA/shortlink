@@ -138,4 +138,13 @@ public class LinkUtil {
         }
         return "PC";
     }
+
+    /**
+     * 获取用户访问的网络
+     * @param actualIp 用户 IP
+     * @return 访问设备
+     */
+    public static String getNetwork(String actualIp) {
+        return actualIp.startsWith("192.168.") || actualIp.startsWith("10.") ? "WIFI" : "Mobile Network";
+    }
 }

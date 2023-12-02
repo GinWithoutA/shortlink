@@ -54,6 +54,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.*;
@@ -75,6 +76,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final RedissonClient redissonClient;
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final StringRedisTemplate stringRedisTemplate;
+    private final ShortLinkAccessLogsMapper shortLinkAccessLogsMapper;
     private final ShortLinkStatisticsMapper shortLinkStatisticsMapper;
     private final ShortLinkOsStatisticsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
@@ -310,16 +312,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
         try {
             // 利用 Runnable 的 run 方法由当前线程执行内部的内容，相当于分离了一个方法出来
+            AtomicReference<String> uvFlag = new AtomicReference<>();
             Runnable addResponseCookieTask = () -> {
                 // 当前名称 uv 的 Cookie 不存在，或者当前不存在 Cookie
                 // 利用 Cookie 来判断是否是同一用户访问，该 Cookie 的保存时间为 1 个月
-                String uvFlag = UUID.fastUUID().toString();
-                Cookie uvCookie = new Cookie("uv", uvFlag);
+                uvFlag.set(UUID.fastUUID().toString());
+                Cookie uvCookie = new Cookie("uv", uvFlag.get());
                 uvCookie.setMaxAge(60 * 60 * 24 * 30);
                 uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.lastIndexOf("/"), fullShortUrl.length()));
                 ((HttpServletResponse) response).addCookie(uvCookie);
                 // TODO 这种直接存 redis 的方式涉及到要存多久，短链接越来越多的时候，很可能发生影响，后续重构要进行修改
-                stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, uvFlag);
+                stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, uvFlag.get());
                 uvEmptyFlag.set(true);
             };
             if (ArrayUtil.isNotEmpty(cookies)) {
@@ -328,7 +331,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .findFirst()
                         .map(Cookie::getValue)
                         .ifPresentOrElse(each -> {
-                            // 当前名称 uv 的 Cookie 存在，判断当前用户 each 是否之前访问过该短链接
+                            // 当前名称 uv 的 Cookie 存在，先将当前用户存储起来，然后判断当前用户 each 是否之前访问过该短链接
+                            uvFlag.set(each);
                             Long uvAdded = stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, each);
                             uvEmptyFlag.set(uvAdded != null && uvAdded > 0);
                         }, addResponseCookieTask);
@@ -383,8 +387,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 shortLinkLocaleStatisticsMapper.shortLinkLocaleStatistics(localeStatisticsDO);
             }
             // 操作系统访问统计
+            String os = LinkUtil.getOs((HttpServletRequest) request);
             ShortLinkOsStatisticsDO shortLinkOsStatisticsDO = ShortLinkOsStatisticsDO.builder()
-                    .os(LinkUtil.getOs((HttpServletRequest) request))
+                    .os(os)
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
                     .gid(gid)
@@ -392,14 +397,25 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .build();
             shortLinkOsStatisticsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
             // 浏览器访问统计
+            String browser = LinkUtil.getBrowser((HttpServletRequest) request);
             ShortLinkBrowserStatisticsDO shortLinkBrowserStatisticsDO = ShortLinkBrowserStatisticsDO.builder()
-                    .browser(LinkUtil.getBrowser((HttpServletRequest) request))
+                    .browser(browser)
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
                     .gid(gid)
                     .date(new Date())
                     .build();
             shortLinkBrowserStatisticsMapper.shortLinkBrowserStatistics(shortLinkBrowserStatisticsDO);
+            // 添加短链接访问日志监控数据
+            ShortLinkAccessLogsDO shortLinkAccessLogsDO = ShortLinkAccessLogsDO.builder()
+                    .user(uvFlag.get())
+                    .ip(remoteAddr)
+                    .browser(browser)
+                    .os(os)
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .build();
+            shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

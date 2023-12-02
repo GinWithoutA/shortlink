@@ -80,6 +80,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatisticsMapper shortLinkStatisticsMapper;
     private final ShortLinkOsStatisticsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
+    private final ShortLinkDeviceStatisticsMapper shortLinkDeviceStatisticsMapper;
     private final ShortLinkLocaleStatisticsMapper shortLinkLocaleStatisticsMapper;
     private final ShortLinkBrowserStatisticsMapper shortLinkBrowserStatisticsMapper;
 
@@ -416,6 +417,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .gid(gid)
                     .build();
             shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
+            // 添加短链接访问设备监控数据
+            ShortLinkDeviceStatisticsDO shortLinkDeviceStatisticsDO = ShortLinkDeviceStatisticsDO.builder()
+                    .device(LinkUtil.getDevice((HttpServletRequest) request))
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkDeviceStatisticsMapper.shortLinkDeviceStatistics(shortLinkDeviceStatisticsDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

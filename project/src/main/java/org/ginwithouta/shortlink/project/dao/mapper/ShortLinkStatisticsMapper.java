@@ -12,6 +12,10 @@ import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatisticsDO;
  */
 public interface ShortLinkStatisticsMapper extends BaseMapper<ShortLinkStatisticsDO> {
 
+    /**
+     * 短链接监控数据插入
+     * @param statisticsDO 要保存的监控数据
+     */
     @Insert("INSERT INTO" +
             "  t_statistics (full_short_url, gid, date, cnt, create_time, update_time, del_flag) " +
             "VALUES " +

@@ -1,6 +1,6 @@
 <template>
   <div class="login-page">
-    <h1 class="title">短 链 接 平 台</h1>
+    <h1 class="title">灵 链 Tiny Bridge</h1>
     <div class="login-box">
       <!-- 登录 -->
       <div class="logon" :class="{ hidden: !isLogin }">

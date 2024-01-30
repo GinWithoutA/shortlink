@@ -77,13 +77,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final ShortLinkAccessLogsMapper shortLinkAccessLogsMapper;
-    private final ShortLinkStatisticsMapper shortLinkStatisticsMapper;
+    private final ShortLinkStatsMapper shortLinkStatsMapper;
     private final ShortLinkOsStatisticsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
     private final ShortLinkDeviceStatisticsMapper shortLinkDeviceStatisticsMapper;
-    private final ShortLinkLocaleStatisticsMapper shortLinkLocaleStatisticsMapper;
+    private final ShortLinkStatsLocaleMapper shortLinkStatsLocaleMapper;
     private final ShortLinkNetworkStatisticsMapper shortLinkNetworkStatisticsMapper;
-    private final ShortLinkBrowserStatisticsMapper shortLinkBrowserStatisticsMapper;
+    private final ShortLinkStatsBrowserMapper shortLinkStatsBrowserMapper;
 
     @Value("${short-link.statistics.locale.amap-key}")
     private String statisticsLocaleAmapKey;
@@ -355,7 +355,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
             int week = DateUtil.dayOfWeekEnum(new Date()).getIso8601Value();
             int hour = DateUtil.hour(new Date(), true);
-            ShortLinkStatisticsDO statisticsDO = ShortLinkStatisticsDO.builder()
+            ShortLinkStatsDO statisticsDO = ShortLinkStatsDO.builder()
                     .pv(1)
                     .uv(uvEmptyFlag.get() ? 1 : 0)
                     .uip(uipEmptyFlag ? 1 : 0)
@@ -365,7 +365,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkStatisticsMapper.shortLinkStatistics(statisticsDO);
+            shortLinkStatsMapper.shortLinkStatistics(statisticsDO);
             // 短链接访问地区统计
             Map<String, Object> localeParamMap = new HashMap<>();
             localeParamMap.put("key", statisticsLocaleAmapKey);
@@ -386,7 +386,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .gid(gid)
                         .date(new Date())
                         .build();
-                shortLinkLocaleStatisticsMapper.shortLinkLocaleStatistics(localeStatisticsDO);
+                shortLinkStatsLocaleMapper.shortLinkLocaleStatistics(localeStatisticsDO);
             }
             // 操作系统访问统计
             String os = LinkUtil.getOs((HttpServletRequest) request);
@@ -400,14 +400,14 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             shortLinkOsStatisticsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
             // 浏览器访问统计
             String browser = LinkUtil.getBrowser((HttpServletRequest) request);
-            ShortLinkBrowserStatisticsDO shortLinkBrowserStatisticsDO = ShortLinkBrowserStatisticsDO.builder()
+            ShortLinkStatsBrowserDO shortLinkStatsBrowserDO = ShortLinkStatsBrowserDO.builder()
                     .browser(browser)
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
                     .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkBrowserStatisticsMapper.shortLinkBrowserStatistics(shortLinkBrowserStatisticsDO);
+            shortLinkStatsBrowserMapper.shortLinkBrowserStatistics(shortLinkStatsBrowserDO);
             // 添加短链接访问日志监控数据
             ShortLinkAccessLogsDO shortLinkAccessLogsDO = ShortLinkAccessLogsDO.builder()
                     .user(uvFlag.get())

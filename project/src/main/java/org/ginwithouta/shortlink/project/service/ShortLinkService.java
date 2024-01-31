@@ -56,4 +56,9 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @param response 短链接相应
      */
     void redirectUrl(String shortUri, ServletRequest request, ServletResponse response);
+
+    /**
+     * 根据 URL 获取对应网站标题
+     */
+    String getTitleByUrl(String url);
 }

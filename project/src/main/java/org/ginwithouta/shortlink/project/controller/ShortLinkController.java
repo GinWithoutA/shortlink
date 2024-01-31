@@ -60,4 +60,12 @@ public class ShortLinkController {
     public Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParams") List<String> requestParams) {
         return Results.success(shortLinkService.listGroupShortLinkCount(requestParams));
     }
+
+    /**
+     * 根据 URL 获取网站标题
+     */
+    @GetMapping(value = "title")
+    public Result<String> getTitleByUrl(@RequestParam(name = "url") String url) {
+        return Results.success(shortLinkService.getTitleByUrl(url));
+    }
 }

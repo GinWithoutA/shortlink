@@ -62,4 +62,12 @@ public class ShortLinkRemoteController {
     public Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParams) {
         return shortLinkRemoteService.listGroupShortLinkCount(requestParams);
     }
+
+    /**
+     * 远程调用根据短链接获取网站标题
+     */
+    @GetMapping(value = "title")
+    public Result<String> getTitleByUrl(@RequestParam(name = "url") String url) {
+        return shortLinkRemoteService.getTitleByUrl(url);
+    }
 }

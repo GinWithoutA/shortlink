@@ -7,6 +7,7 @@ const removeCookies = () => {
 }
 // test('should first', () => { second })
 </script>
+
 <template>
   <el-config-provider :locale="zhCn">
     <router-view />

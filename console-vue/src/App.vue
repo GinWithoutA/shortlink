@@ -18,4 +18,5 @@ const removeCookies = () => {
 a {
  text-decoration: none !important;
 }
+
 </style>

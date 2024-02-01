@@ -3,9 +3,9 @@
     <el-container>
       <el-header height="54px" style="padding: 0">
         <div class="header">
-          <div @click="toMySpace" class="logo">灵链 Easy Connect - 一个好用的SaaS短链接平台</div>
+          <div @click="toMySpace" class="logo">灵链 Tiny Bridge - 一个好用的SaaS短链接平台</div>
           <div style="display: flex; align-items: center">
-            <a
+            <!-- <a
               class="link-span"
               style="text-decoration: none"
               target="_blank"
@@ -47,7 +47,7 @@
                   <el-dropdown-item divided @click="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </template>
-            </el-dropdown>
+            </el-dropdown> -->
           </div>
         </div>
       </el-header>

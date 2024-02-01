@@ -32,7 +32,7 @@ public interface ShortLinkRemoteService {
      * @return 短链接
      */
     default Result<ShortLinkCreateRespDTO> createShorLink(ShortLinkCreateReqDTO requestParam) {
-        String resultBodyStr = HttpUtil.post(URL_PREFIX + "link", JSON.toJSONString(requestParam));
+        String resultBodyStr = HttpUtil.post(URL_PREFIX + "create", JSON.toJSONString(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
     }
 

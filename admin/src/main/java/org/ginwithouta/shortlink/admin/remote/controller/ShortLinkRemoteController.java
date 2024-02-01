@@ -33,7 +33,7 @@ public class ShortLinkRemoteController {
     /**
      * 远程调用创建短链接
      */
-    @PostMapping(value = "link")
+    @PostMapping(value = "create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return shortLinkRemoteService.createShorLink(requestParam);
     }

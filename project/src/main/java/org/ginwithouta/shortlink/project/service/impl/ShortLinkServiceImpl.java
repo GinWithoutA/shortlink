@@ -231,7 +231,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @SneakyThrows
     @Override
     public void redirectUrl(String shortUri, ServletRequest request, ServletResponse response) {
-        String serverName = DOMAIN_PREFIX + request.getServerName();
+        String serverName = /* DOMAIN_PREFIX + */ request.getServerName();
         String fullShortUrl = StrBuilder.create(serverName).append("/").append(shortUri).toString();
         // 先查缓存，如果有就直接返回
         String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));

@@ -13,7 +13,6 @@ const removeCookies = () => {
     <router-view />
   </el-config-provider>
 </template>
-
 <style scoped lang="less">
 a {
  text-decoration: none !important;

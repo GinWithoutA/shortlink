@@ -253,6 +253,8 @@ const verificationLogin = (formEl) => {
         } else {
           ElMessage.warning('用户已在别处登录，请勿重复登录！')
         }
+      } else if(res1.data.code == "B000204") { 
+        ElMessage.error('用户名或密码错误')
       } else {
         ElMessage.error('请输入正确的验证码!')
       }

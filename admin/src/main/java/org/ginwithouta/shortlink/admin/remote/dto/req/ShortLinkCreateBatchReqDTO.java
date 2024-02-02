@@ -4,15 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
- * @Package : org.ginwithouta.shortlink.project.dto.req
- * @Author : NONO Wang
- * @Date : 2023 - 11月 - 周一
- * @Desc : 短链接创建请求对象
+ * @author Ginwithouta
+ * Generate at 2024/2/2
+ * 批量创建短链接请求
  */
 @Data
-public class ShortLinkCreateReqDTO {
+public class ShortLinkCreateBatchReqDTO {
     /**
      * 域名
      */
@@ -21,7 +21,7 @@ public class ShortLinkCreateReqDTO {
     /**
      * 原始链接（短链接跳转的目标链接）
      */
-    private String originUrl;
+    private List<String> originUrls;
 
     /**
      * 分组标识
@@ -47,5 +47,5 @@ public class ShortLinkCreateReqDTO {
     /**
      * 短链接描述
      */
-    private String describe;
+    private List<String> describes;
 }

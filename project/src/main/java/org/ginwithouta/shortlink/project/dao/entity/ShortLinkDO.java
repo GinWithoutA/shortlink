@@ -78,6 +78,6 @@ public class ShortLinkDO extends BaseDO {
     /**
      * 短链接描述
      */
-    private String description;
+    private String describe;
 
 }

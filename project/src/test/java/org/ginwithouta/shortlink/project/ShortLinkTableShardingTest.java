@@ -23,7 +23,7 @@ public class ShortLinkTableShardingTest {
             created_type    tinyint(1)                     null comment '创建类型 0 接口创建 1 平台创建',
             valid_date_type tinyint(1)                     null comment '有效期类型 0 永久有效 1 临时有效',
             valid_date      datetime                       null comment '有效期',
-            description     varchar(1024)                  null comment '短链接描述',
+            describe        varchar(1024)                  null comment '短链接描述',
             create_time     datetime                       null comment 'chuagn''j',
             update_time     datetime                       null comment '更新时间',
             del_flag        tinyint(1)  default 0          null comment '逻辑删除标识 0 未删除 1 已删除',

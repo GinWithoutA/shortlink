@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateBatchReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -61,4 +63,11 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * 根据 URL 获取对应网站标题
      */
     String getTitleByUrl(String url);
+
+    /**
+     * 批量创建短链接接口
+     * @param requestParams 需要创建的短链接
+     * @return 创建好的短链接
+     */
+    ShortLinkCreateBatchRespDTO createBatchShortLink(ShortLinkCreateBatchReqDTO requestParams);
 }

@@ -27,12 +27,15 @@ import org.ginwithouta.shortlink.project.common.convention.exception.ClientExcep
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateBatchReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+import org.ginwithouta.shortlink.project.service.ShortLinkGoToService;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.ginwithouta.shortlink.project.toolkit.HashUtil;
 import org.ginwithouta.shortlink.project.toolkit.LinkUtil;
@@ -57,7 +60,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
-import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.*;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.REDIRECT_TO_NOT_FOUND_URI;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheValidDate;
@@ -74,7 +78,7 @@ import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheVal
 public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLinkDO> implements ShortLinkService {
 
     private final RedissonClient redissonClient;
-    private final ShortLinkGoToMapper shortLinkGoToMapper;
+    private final ShortLinkGoToService shortLinkGoToService;
     private final StringRedisTemplate stringRedisTemplate;
     private final ShortLinkAccessLogsMapper shortLinkAccessLogsMapper;
     private final ShortLinkStatsMapper shortLinkStatsMapper;
@@ -92,7 +96,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public ShortLinkCreateRespDTO createShorLink(ShortLinkCreateReqDTO requestParam) {
-        String shortLinkSuffix = generateSuffix(requestParam);
+        String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), requestParam.getDomain());
         String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                 .append("/")
                 .append(shortLinkSuffix)
@@ -100,6 +104,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
         shortLinkDO.setFullShortUrl(fullShortLinkUrl);
         shortLinkDO.setShortUri(shortLinkSuffix);
+        shortLinkDO.setDescription(requestParam.getDescribe());
         // TODO 恶意请求有风险，后续要改成异步的
         shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
         // 创建短链接的时候同时插入路由记录
@@ -109,21 +114,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .build();
         try {
             int inserted = baseMapper.insert(shortLinkDO);
-            inserted += shortLinkGoToMapper.insert(shortLinkGoToDO);
-            if (inserted < 2) {
-                    throw new ServiceException(SHORT_LINK_CREATE_FAIL);
+            boolean res = shortLinkGoToService.save(shortLinkGoToDO);
+            if (inserted != 1 || !res) {
+                throw new ServiceException(SHORT_LINK_CREATE_FAIL);
             }
         } catch (DuplicateKeyException ex) {
             // 多线程情况下，可能有多个线程获取到同一个短链接，并判空
-            log.warn("短链接：并发异常，{} 重复入库", fullShortLinkUrl);
+            log.warn("短链接：并发异常，{} 重复入库", shortLinkDO.getFullShortUrl());
             throw new ServiceException(SHORT_LINK_BLOOM_FAIL);
         }
         // 创建的短链接直接放到 Redis 缓存中
         stringRedisTemplate.opsForValue().set(
-                String.format(GOTO_SHORT_LINK_KEY, fullShortLinkUrl),
+                String.format(GOTO_SHORT_LINK_KEY, shortLinkDO.getFullShortUrl()),
                 requestParam.getOriginUrl(),
                 getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
-        shortUriCreateCachePenetrationBloomFilter.add(fullShortLinkUrl);
+        shortUriCreateCachePenetrationBloomFilter.add(shortLinkDO.getFullShortUrl());
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl(shortLinkDO.getFullShortUrl())
                 .originUrl(shortLinkDO.getOriginUrl())
@@ -131,20 +136,74 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .build();
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public ShortLinkCreateBatchRespDTO createBatchShortLink(ShortLinkCreateBatchReqDTO requestParam) {
+        if (requestParam.getOriginUrls().size() != requestParam.getDescribes().size()) {
+            throw new ServiceException(SHORT_LINK_CREATE_FAIL);
+        }
+        List<String> fullShortUrls = new ArrayList<>();
+        List<ShortLinkDO> shortLinkSaveBatch = new ArrayList<>();
+        List<ShortLinkGoToDO> shortLinkGoToSaveBatch = new ArrayList<>();
+        for (int i = 0; i < requestParam.getOriginUrls().size(); ++i) {
+            String shortLinkSuffix = generateSuffix(requestParam.getOriginUrls().get(i), requestParam.getDomain());
+            String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
+                    .append("/")
+                    .append(shortLinkSuffix)
+                    .toString();
+            ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
+            shortLinkDO.setOriginUrl(requestParam.getOriginUrls().get(i));
+            shortLinkDO.setDescription(requestParam.getDescribes().get(i));
+            shortLinkDO.setFullShortUrl(fullShortLinkUrl);
+            shortLinkDO.setShortUri(shortLinkSuffix);
+            // TODO 恶意请求有风险，后续要改成异步的
+            shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrls().get(i)));
+            shortLinkSaveBatch.add(shortLinkDO);
+            fullShortUrls.add(fullShortLinkUrl);
+            // 创建短链接的时候同时插入路由记录
+            shortLinkGoToSaveBatch.add(ShortLinkGoToDO.builder()
+                .gid(requestParam.getGid())
+                .fullShortUrl(fullShortLinkUrl)
+                .build());
+        }
+        boolean res = this.saveBatch(shortLinkSaveBatch);
+        if (!res) {
+            throw new ClientException(SHORT_LINK_CREATE_FAIL);
+        }
+        res = shortLinkGoToService.saveBatch(shortLinkGoToSaveBatch);
+        if (!res) {
+            throw new ClientException(SHORT_LINK_CREATE_FAIL);
+        }
+        // 创建的短链接直接放到 Redis 缓存中
+        shortLinkSaveBatch.forEach(each -> {
+            stringRedisTemplate.opsForValue().set(
+                    String.format(GOTO_SHORT_LINK_KEY, each.getFullShortUrl()),
+                    each.getOriginUrl(),
+                    getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
+            shortUriCreateCachePenetrationBloomFilter.add(each.getFullShortUrl());
+        });
+        return ShortLinkCreateBatchRespDTO.builder()
+                .fullShortUrls(fullShortUrls)
+                .originUrls(requestParam.getOriginUrls())
+                .gid(requestParam.getGid())
+                .build();
+    }
+
     /**
      * 生成 BASE62 编码生成短链接后缀
-     * @param requestParam 生成短链接入参
+     * @param domain 主域名
+     * @param originUrl 原始链接
      * @return 短链接后缀
      */
-    private String generateSuffix(ShortLinkCreateReqDTO requestParam) {
+    private String generateSuffix(String originUrl, String domain) {
         int customGenerateCount = 1;
-        String shortUri, originUrl;
+        String shortUri;
         while (true) {
-            originUrl = StrBuilder.create(requestParam.getOriginUrl())
+            originUrl = StrBuilder.create(originUrl)
                     .append(System.currentTimeMillis())
                     .toString();
             shortUri = HashUtil.hashToBase62(originUrl);
-            if (!shortUriCreateCachePenetrationBloomFilter.contains(StrBuilder.create(requestParam.getDomain())
+            if (!shortUriCreateCachePenetrationBloomFilter.contains(StrBuilder.create(domain)
                     .append("/")
                     .append(shortUri)
                     .toString())) {
@@ -218,7 +277,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ShortLinkDO shortLinkDO = ShortLinkDO.builder()
                     .gid(requestParam.getGid())
                     .originUrl(requestParam.getOriginUrl())
-                    .description(requestParam.getDescription())
+                    .description(requestParam.getDescribe())
                     .validDateType(requestParam.getValidDateType())
                     .validDate(requestParam.getValidDate())
                     .build();
@@ -270,7 +329,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             // 先查路由表
             LambdaQueryWrapper<ShortLinkGoToDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
                     .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-            ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(linkGotoQueryWrapper);
+            ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(linkGotoQueryWrapper);
             if (shortLinkGoToDO == null) {
                 // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层空值布隆过滤器中
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
@@ -350,7 +409,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
                         .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToMapper.selectOne(queryWrapper);
+                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(queryWrapper);
                 gid = shortLinkGoToDO.getGid();
             }
             int week = DateUtil.dayOfWeekEnum(new Date()).getIso8601Value();

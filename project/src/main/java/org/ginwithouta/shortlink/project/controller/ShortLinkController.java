@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateBatchReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
@@ -34,6 +36,14 @@ public class ShortLinkController {
     @PostMapping(value = "create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return Results.success(shortLinkService.createShorLink(requestParam));
+    }
+
+    /**
+     * 批量创建短链接
+     */
+    @PostMapping(value = "create/batch")
+    public Result<ShortLinkCreateBatchRespDTO> createBatchShorLink(@RequestBody ShortLinkCreateBatchReqDTO requestParam) {
+        return Results.success(shortLinkService.createBatchShortLink(requestParam));
     }
 
     /**

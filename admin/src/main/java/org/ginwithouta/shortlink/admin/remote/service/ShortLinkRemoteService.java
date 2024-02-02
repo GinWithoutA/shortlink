@@ -5,9 +5,11 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateBatchReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
@@ -33,6 +35,14 @@ public interface ShortLinkRemoteService {
      */
     default Result<ShortLinkCreateRespDTO> createShorLink(ShortLinkCreateReqDTO requestParam) {
         String resultBodyStr = HttpUtil.post(URL_PREFIX + "create", JSON.toJSONString(requestParam));
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
+    }
+
+    /**
+     * 远程调用批量创建短链接
+     */
+    default Result<ShortLinkCreateBatchRespDTO> createBatchShortLink(ShortLinkCreateBatchReqDTO requestParam) {
+        String resultBodyStr = HttpUtil.post(URL_PREFIX + "create/batch", JSON.toJSONString(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
     }
 

@@ -3,6 +3,8 @@ package org.ginwithouta.shortlink.admin.remote.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateBatchReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
@@ -36,6 +38,14 @@ public class ShortLinkRemoteController {
     @PostMapping(value = "create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return shortLinkRemoteService.createShorLink(requestParam);
+    }
+
+    /**
+     * 远程调用批量创建短链接
+     */
+    @PostMapping(value = "create/batch")
+    public Result<ShortLinkCreateBatchRespDTO> createBatchShortLink(@RequestBody ShortLinkCreateBatchReqDTO requestParam) {
+        return shortLinkRemoteService.createBatchShortLink(requestParam);
     }
 
     /**

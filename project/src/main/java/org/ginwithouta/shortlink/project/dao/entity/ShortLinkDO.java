@@ -1,5 +1,6 @@
 package org.ginwithouta.shortlink.project.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import org.ginwithouta.shortlink.project.common.database.BaseDO;
@@ -78,6 +79,7 @@ public class ShortLinkDO extends BaseDO {
     /**
      * 短链接描述
      */
+    @TableField("description")
     private String describe;
 
 }

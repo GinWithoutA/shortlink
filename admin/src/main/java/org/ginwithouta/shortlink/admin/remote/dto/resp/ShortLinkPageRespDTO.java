@@ -63,7 +63,7 @@ public class ShortLinkPageRespDTO {
     /**
      * 短链接描述
      */
-    private String describes;
+    private String describe;
 
     /**
      * 创建时间

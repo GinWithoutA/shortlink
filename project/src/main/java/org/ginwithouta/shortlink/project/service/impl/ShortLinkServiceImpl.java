@@ -484,7 +484,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             shortLinkStatsBrowserMapper.shortLinkBrowserStatistics(shortLinkStatsBrowserDO);
-            // 添加短链接访问日志监控数据
+            /*
+             * 短链接监控之高频访问 IP （通过访问日志表实现）
+             */
             ShortLinkAccessLogsDO shortLinkAccessLogsDO = ShortLinkAccessLogsDO.builder()
                     .user(uvFlag.get())
                     .ip(remoteAddr)

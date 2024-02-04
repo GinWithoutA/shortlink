@@ -39,7 +39,7 @@ public interface RecycleBinRemoteService {
      * @param requestParam 恢复短链接请求入参
      */
     default void restoreRecycleBin(@RequestBody RecycleBinRestoreReqDTO requestParam) {
-        HttpUtil.post(URL_PREFIX + "restore", JSON.toJSONString(requestParam));
+        HttpUtil.post(URL_PREFIX + "recover", JSON.toJSONString(requestParam));
     }
 
     /**

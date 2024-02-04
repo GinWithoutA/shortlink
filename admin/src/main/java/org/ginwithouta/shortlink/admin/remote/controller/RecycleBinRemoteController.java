@@ -47,7 +47,7 @@ public class RecycleBinRemoteController {
     /**
      * 恢复短链接，将短链接从回收站中移除
      */
-    @PostMapping(value = "restore")
+    @PostMapping(value = "recover")
     public Result<Void> restoreRecycleBin(@RequestBody RecycleBinRestoreReqDTO requestParam) {
         recycleBinRemoteService.restoreRecycleBin(requestParam);
         return Results.success();

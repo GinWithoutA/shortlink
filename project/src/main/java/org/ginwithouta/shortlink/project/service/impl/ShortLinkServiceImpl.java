@@ -310,7 +310,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
             return;
         }
-        // 如果上面的布隆过滤器中存在，查询第二层布隆过滤器，如果存在值，说明是误判，直接返回
+        // 如果上面的布隆过滤器中存在，查询第二层缓存，如果存在值，说明当前短链接已经失效或者不存在，直接返回
         String gotoIsNullShortLinkKey = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(gotoIsNullShortLinkKey)) {
             ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
@@ -335,7 +335,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
             ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(linkGotoQueryWrapper);
             if (shortLinkGoToDO == null) {
-                // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层空值布隆过滤器中
+                // 查询数据库中发现没有，将当前的 fullShortLink 加到第二层空值过滤器中
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
                 return;

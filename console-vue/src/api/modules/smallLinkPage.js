@@ -41,7 +41,7 @@ export default {
   // 移动到回收站
   toRecycleBin(data) {
     return http({
-      url: '/recycle-bin/save',
+      url: '/recycle/bin/save',
       method: 'post',
       data
     })

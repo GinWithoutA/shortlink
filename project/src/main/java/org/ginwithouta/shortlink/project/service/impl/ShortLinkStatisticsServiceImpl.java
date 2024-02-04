@@ -44,15 +44,15 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
             // 如果当前短链接没有记录，直接返回 NULL 就行，不用管
             return null;
         }
+        /*
+         * 短链接监控之基础数据（PV，UV，UIP）
+         */
         List<ShortLinkStatsDailyRespDTO> dailyStatistics = new ArrayList<>();
         // 通过 requestParam 中传入的 startDate 以及 endDate 生成中间每一天的日期，例如 [2023/11/1, 2023/11/2, 2023/11/3, ...]
         List<String> eachDates = DateUtil.rangeToList(DateUtil.parse(requestParam.getStartDate()), DateUtil.parse(requestParam.getEndDate()), DateField.DAY_OF_MONTH)
                 .stream()
                 .map(DateUtil::formatDate)
                 .toList();
-        /*
-         * 短链接监控之基础数据（PV，UV，UIP）
-         */
         // 遍历每一天，看短链接监控是否有当天的监控信息，如果有则登记，如果没有，则赋值一个 0
         eachDates.forEach(eachDay -> statsListByShortLink.stream()
             .filter(stats -> Objects.equals(eachDay, DateUtil.formatDate(stats.getDate())))
@@ -92,7 +92,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .build();
             localeCNRespDTOS.add(localeCNRespDTO);
         });
-        // 获取指定时间段内短链接访问的 24 小时分布情况
+        /*
+         * 短链接监控之 24 小时访问分布情况
+         */
         List<Integer> hoursStats = new ArrayList<>(24);
         List<ShortLinkStatsDO> listHoursByShortLink = baseMapper.listHoursStatisticsByShortLink(requestParam);
         for (int i = 0; i < 24; ++i) {
@@ -104,7 +106,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .orElse(0);
             hoursStats.add(hourCnt);
         }
-        // 高频访问 IP 详情
+        /*
+         * 短链接监控之高频访问 IP
+         */
         List<ShortLinkStatsTopIpRespDTO> topIpStats = new ArrayList<>();
         List<HashMap<String, Object>> listTopIpByShortLink = accessLogsMapper.listTopIpByShortLink(requestParam);
         listTopIpByShortLink.forEach(each -> {

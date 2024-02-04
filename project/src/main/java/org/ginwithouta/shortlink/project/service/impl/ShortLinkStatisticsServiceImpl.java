@@ -118,10 +118,12 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .build();
             topIpStats.add(statsTopIpRespDTO);
         });
-        // 一周内每天的的访问详情
+        /*
+         * 短链接监控之一周内的访问情况
+         */
         List<Integer> weekdayStats = new ArrayList<>();
         List<ShortLinkStatsDO> listWeekStatsByShortLink = baseMapper.listWeekStatsByShortLink(requestParam);
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 1; i < 8; ++i) {
             AtomicInteger weekday = new AtomicInteger(i);
             int weekdayCnt = listWeekStatsByShortLink.stream()
                     .filter(each -> Objects.equals(each.getWeekday(), weekday.get()))

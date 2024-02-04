@@ -472,7 +472,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             shortLinkOsStatisticsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
-            // 浏览器访问统计
+            /*
+             * 短链接监控之浏览器
+             */
             String browser = LinkUtil.getBrowser((HttpServletRequest) request);
             ShortLinkStatsBrowserDO shortLinkStatsBrowserDO = ShortLinkStatsBrowserDO.builder()
                     .browser(browser)

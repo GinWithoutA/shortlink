@@ -9,7 +9,7 @@ import java.util.Date;
 /**
  * @author Ginwithouta
  * Generate at 2023/12/1
- * 短链接操作系统统计实体
+ * 短链接监控之操作系统实体类
  */
 @Data
 @Builder

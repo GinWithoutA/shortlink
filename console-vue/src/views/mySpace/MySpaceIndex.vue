@@ -949,7 +949,7 @@ const recoverLink = (data) => {
     .then((res) => {
       ElMessage.success('恢复成功')
       queryRecycleBinPage()
-      getGroupInfo(queryPage)
+      // getGroupInfo(queryPage)
     })
     .catch((reason) => {
       ElMessage.error('恢复失败')

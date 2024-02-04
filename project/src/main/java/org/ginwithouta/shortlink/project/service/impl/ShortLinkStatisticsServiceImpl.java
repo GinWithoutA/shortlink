@@ -132,10 +132,24 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .orElse(0);
             weekdayStats.add(weekdayCnt);
         }
-        // 浏览器访问详情
+        /*
+         * 短链接监控之浏览器
+         */
         List<ShortLinkStatsBrowserRespDTO> browserStats = new ArrayList<>();
-        //List<HashMap<String, Object>> listBrowserStatsByShortLink = statsBrowserMapper
-        // TODO
+        List<HashMap<String, Object>> listBrowserStatsByShortLink = statsBrowserMapper.listBrowserStatsByShortLink(requestParam);
+        int browserSum = listBrowserStatsByShortLink.stream()
+                .mapToInt(each -> Integer.parseInt(each.get("count").toString()))
+                .sum();
+        listBrowserStatsByShortLink.forEach(each -> {
+            double ratio = (double) Integer.parseInt(each.get("count").toString()) / browserSum;
+            double actualRatio = Math.round(ratio * 100.0) / 100.0;
+            ShortLinkStatsBrowserRespDTO shortLinkStatsBrowserRespDTO = ShortLinkStatsBrowserRespDTO.builder()
+                    .cnt(Integer.parseInt(each.get("count").toString()))
+                    .browser(each.get("browser").toString())
+                    .ratio(actualRatio)
+                    .build();
+            browserStats.add(shortLinkStatsBrowserRespDTO);
+        });
         return null;
     }
 }

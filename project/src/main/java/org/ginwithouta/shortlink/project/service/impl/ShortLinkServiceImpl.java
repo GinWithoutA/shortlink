@@ -346,7 +346,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
                     .eq(ShortLinkDO::getEnable, 1);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
-            if (shortLinkDO == null || shortLinkDO.getValidDate().isBefore(LocalDateTime.now())) {
+            if (shortLinkDO == null || (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().isBefore(LocalDateTime.now()))) {
                 // 如果查询数据库中发现不存在，或者存在，但是已经过期，将当前的 fullShortLink 加到第二层布隆过滤器中
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);

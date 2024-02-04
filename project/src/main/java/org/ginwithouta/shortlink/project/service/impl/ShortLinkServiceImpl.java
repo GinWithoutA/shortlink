@@ -460,7 +460,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .build();
                 shortLinkStatsLocaleMapper.shortLinkLocaleStatistics(localeStatisticsDO);
             }
-            // 操作系统访问统计
+            /*
+             * 短链接监控之操作系统
+             */
             String os = LinkUtil.getOs((HttpServletRequest) request);
             ShortLinkOsStatisticsDO shortLinkOsStatisticsDO = ShortLinkOsStatisticsDO.builder()
                     .os(os)

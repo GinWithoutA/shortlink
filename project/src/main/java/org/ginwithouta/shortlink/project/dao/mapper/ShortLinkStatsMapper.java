@@ -47,14 +47,14 @@ public interface ShortLinkStatsMapper extends BaseMapper<ShortLinkStatsDO> {
      * @return 短链接小时监控数据
      */
     @Select("SELECT hour, SUM(pv) AS pv FROM t_statistics " +
-            "WHERE full_short_url = #{requestParam.shortLinkUrl} " +
+            "WHERE full_short_url = #{requestParam.fullShortUrl} " +
             "   AND gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, hour;")
     List<ShortLinkStatsDO> listHoursStatisticsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     @Select("SELECT weekday, SUM(pv) AS pv FROM t_statistics " +
-            "WHERE full_short_url = #{requestParam.shortLinkUrl} " +
+            "WHERE full_short_url = #{requestParam.fullShortUrl} " +
             "   AND gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, weekday;")

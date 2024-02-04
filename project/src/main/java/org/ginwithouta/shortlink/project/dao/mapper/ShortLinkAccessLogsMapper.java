@@ -22,7 +22,8 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
      * @return  高频访问 IP
      */
     @Select("SELECT ip, COUNT(ip) AS count FROM t_access_logs " +
-            "WHERE full_short_url = #{requestParam.shortLinkUrl} " +
+            "WHERE " +
+            "   full_short_url = #{requestParam.fullShortUrl} " +
             "   AND gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, ip " +

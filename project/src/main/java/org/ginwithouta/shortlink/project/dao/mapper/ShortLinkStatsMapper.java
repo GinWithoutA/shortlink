@@ -17,7 +17,7 @@ import java.util.List;
 public interface ShortLinkStatsMapper extends BaseMapper<ShortLinkStatsDO> {
 
     /**
-     * 短链接监控数据插入
+     * 短链接监控基本数据插入
      * @param statisticsDO 要保存的监控数据
      */
     @Insert("INSERT INTO" +

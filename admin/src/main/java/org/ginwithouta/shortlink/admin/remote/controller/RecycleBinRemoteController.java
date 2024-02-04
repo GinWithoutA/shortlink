@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(value = "/api/short/link/admin/v1/recycle/bin/v1/")
+@RequestMapping(value = "/api/short/link/admin/v1/recycle/bin/")
 public class RecycleBinRemoteController {
 
     /**

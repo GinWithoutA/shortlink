@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 public interface RecycleBinRemoteService {
 
-    String URL_PREFIX = "http://127.0.0.1:8001/api/short/link/recycle/bin/v1/";
+    String URL_PREFIX = "http://127.0.0.1:8001/api/short/link/project/v1/recycle/bin/";
 
     /**
      * 远程调用保存回收站功能

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  * 回收站控制层
  */
 @RestController
-@RequestMapping(value = "/api/short/link/recycle/bin/v1/")
+@RequestMapping(value = "/api/short/link/project/v1/recycle/bin/")
 @RequiredArgsConstructor
 public class RecycleBinController {
 

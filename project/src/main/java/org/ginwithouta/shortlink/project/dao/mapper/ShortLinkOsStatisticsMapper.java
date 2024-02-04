@@ -19,7 +19,8 @@ public interface ShortLinkOsStatisticsMapper extends BaseMapper<ShortLinkOsStati
     @Insert("INSERT INTO" +
             "  t_os_statistics (full_short_url, gid, date, cnt, os, create_time, update_time, del_flag) " +
             "VALUES " +
-            "  (#{osStatisticsDO.fullShortUrl}, #{osStatisticsDO.gid}, #{osStatisticsDO.date}, #{osStatisticsDO.cnt}, #{osStatisticsDO.os}, NOW(), NOW(), 0) " +
+            "  (#{osStatisticsDO.fullShortUrl}, #{osStatisticsDO.gid}, #{osStatisticsDO.date}, #{osStatisticsDO.cnt}, " +
+            "   #{osStatisticsDO.os}, NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{osStatisticsDO.cnt}, update_time = NOW();")
     void shortLinkOsStatistics(@Param("osStatisticsDO") ShortLinkOsStatisticsDO osStatisticsDO);

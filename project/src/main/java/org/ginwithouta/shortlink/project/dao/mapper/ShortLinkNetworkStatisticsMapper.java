@@ -19,7 +19,8 @@ public interface ShortLinkNetworkStatisticsMapper extends BaseMapper<ShortLinkNe
     @Insert("INSERT INTO" +
             "  t_network_statistics (full_short_url, gid, date, cnt, network, create_time, update_time, del_flag) " +
             "VALUES " +
-            "  (#{networkStatisticsDO.fullShortUrl}, #{networkStatisticsDO.gid}, #{networkStatisticsDO.date}, #{networkStatisticsDO.cnt}, #{networkStatisticsDO.network}, NOW(), NOW(), 0) " +
+            "  (#{networkStatisticsDO.fullShortUrl}, #{networkStatisticsDO.gid}, #{networkStatisticsDO.date}, #{networkStatisticsDO.cnt}, " +
+            "   #{networkStatisticsDO.network}, NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{networkStatisticsDO.cnt}, update_time = NOW();")
     void shortLinkNetworkStatistics(@Param("networkStatisticsDO") ShortLinkNetworkStatisticsDO networkStatisticsDO);

@@ -485,7 +485,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .build();
             shortLinkStatsBrowserMapper.shortLinkBrowserStatistics(shortLinkStatsBrowserDO);
             /*
-             * 短链接监控之高频访问 IP （通过访问日志表实现）
+             * 短链接监控之访问日志
+             *  （1）高频 IP
+             *  （2）访客类型
              */
             ShortLinkAccessLogsDO shortLinkAccessLogsDO = ShortLinkAccessLogsDO.builder()
                     .user(uvFlag.get())
@@ -496,7 +498,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .gid(gid)
                     .build();
             shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
-            // 添加短链接访问设备监控数据
+            /*
+             * 短链接监控之设备
+             */
             ShortLinkDeviceStatisticsDO shortLinkDeviceStatisticsDO = ShortLinkDeviceStatisticsDO.builder()
                     .device(LinkUtil.getDevice((HttpServletRequest) request))
                     .fullShortUrl(fullShortUrl)
@@ -505,7 +509,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             shortLinkDeviceStatisticsMapper.shortLinkDeviceStatistics(shortLinkDeviceStatisticsDO);
-            // 添加短链接访问网络监控数据
+            /*
+             * 短链接监控之网络
+             */
             ShortLinkNetworkStatisticsDO shortLinkNetworkStatisticsDO = ShortLinkNetworkStatisticsDO.builder()
                     .network(LinkUtil.getNetwork(remoteAddr))
                     .fullShortUrl(fullShortUrl)

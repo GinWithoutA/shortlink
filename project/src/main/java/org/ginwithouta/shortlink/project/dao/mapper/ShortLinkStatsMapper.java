@@ -36,7 +36,8 @@ public interface ShortLinkStatsMapper extends BaseMapper<ShortLinkStatsDO> {
      * @return 短链接监控记录
      */
     @Select("SELECT date, SUM(pv) AS pv, SUM(uv) as uv, SUM(uip) as uip FROM t_statistics " +
-            "WHERE full_short_url = #{requestParam.fullShortUrl} AND gid = ${requestParam.gid} AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate}" +
+            "WHERE full_short_url = #{requestParam.fullShortUrl} AND gid = ${requestParam.gid} " +
+            "AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate}" +
             "GROUP BY full_short_url, gid, date;")
     List<ShortLinkStatsDO> listStatisticsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 

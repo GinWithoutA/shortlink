@@ -49,7 +49,7 @@ export default {
   // 查询回收站数据
   queryRecycleBin(data) {
     return http({
-      url: '/recycle-bin/page',
+      url: '/recycle/bin/page',
       method: 'get',
       params: data
     })
@@ -58,14 +58,14 @@ export default {
   recoverLink(data) {
     return http({
       method: 'post',
-      url: '/recycle-bin/recover',
+      url: '/recycle/bin/recover',
       data
     })
   },
   removeLink(data) {
     return http({
       method: 'post',
-      url: '/recycle-bin/remove',
+      url: '/recycle/bin/remove',
       data
     })
   },

@@ -92,7 +92,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsBrowserMapper shortLinkStatsBrowserMapper;
 
     @Value("${short-link.statistics.locale.amap-key}")
-    private String statisticsLocaleAmapKey;
+    private String statisticsLocaleAMapKey;
 
     private static final int MAX_GENERATE_TIMES = 100;
 
@@ -437,10 +437,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .build();
             shortLinkStatsMapper.shortLinkStatistics(statisticsDO);
             /*
-             * 短链接监控之地区
+             * 短链接监控之地区（通过高德地图 API 获取当前访问所属地区）
              */
             Map<String, Object> localeParamMap = new HashMap<>();
-            localeParamMap.put("key", statisticsLocaleAmapKey);
+            localeParamMap.put("key", statisticsLocaleAMapKey);
             localeParamMap.put("ip", remoteAddr);
             String localeResultStr = HttpUtil.get(AMAP_REMOTE_URL, localeParamMap);
             JSONObject localeResultObj = JSON.parseObject(localeResultStr);

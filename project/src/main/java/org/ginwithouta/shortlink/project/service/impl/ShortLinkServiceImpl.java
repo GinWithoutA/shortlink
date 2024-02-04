@@ -62,6 +62,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.REDIRECT_TO_NOT_FOUND_URI;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkStatsConstant.REDIS_PREFIX_LINK_STATS_UIP;
+import static org.ginwithouta.shortlink.project.common.constant.ShortLinkStatsConstant.REDIS_PREFIX_LINK_STATS_UV;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.*;
 import static org.ginwithouta.shortlink.project.common.enums.VaildDateTypeEnum.PERMANENT;
 import static org.ginwithouta.shortlink.project.toolkit.LinkUtil.getLinkCacheValidDate;
@@ -346,6 +348,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getFullShortUrl, fullShortUrl)
                     .eq(ShortLinkDO::getEnable, 1);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
+            // 有效期可能为空
             if (shortLinkDO == null || (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().isBefore(LocalDateTime.now()))) {
                 // 如果查询数据库中发现不存在，或者存在，但是已经过期，将当前的 fullShortLink 加到第二层布隆过滤器中
                 stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
@@ -373,6 +376,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
      * @param gid           短链接分组标识
      */
     private void shortLinkStatistics(String fullShortUrl, String gid, ServletRequest request, ServletResponse response) {
+        /*
+         * 短链接监控之基础信息监控
+         */
         AtomicBoolean uvEmptyFlag = new AtomicBoolean();
         Cookie[] cookies = ((HttpServletRequest) request).getCookies();
         try {
@@ -384,10 +390,11 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 uvFlag.set(UUID.fastUUID().toString());
                 Cookie uvCookie = new Cookie("uv", uvFlag.get());
                 uvCookie.setMaxAge(60 * 60 * 24 * 30);
+                // 指定 Cookie 的适用范围
                 uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.lastIndexOf("/"), fullShortUrl.length()));
                 ((HttpServletResponse) response).addCookie(uvCookie);
                 // TODO 这种直接存 redis 的方式涉及到要存多久，短链接越来越多的时候，很可能发生影响，后续重构要进行修改
-                stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, uvFlag.get());
+                stringRedisTemplate.opsForSet().add(REDIS_PREFIX_LINK_STATS_UV + fullShortUrl, uvFlag.get());
                 uvEmptyFlag.set(true);
             };
             if (ArrayUtil.isNotEmpty(cookies)) {
@@ -398,17 +405,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .ifPresentOrElse(each -> {
                             // 当前名称 uv 的 Cookie 存在，先将当前用户存储起来，然后判断当前用户 each 是否之前访问过该短链接
                             uvFlag.set(each);
-                            Long uvAdded = stringRedisTemplate.opsForSet().add("short-link:statistics:uv:" + fullShortUrl, each);
-                            uvEmptyFlag.set(uvAdded != null && uvAdded > 0);
+                            Long uvAdded = stringRedisTemplate.opsForSet().add(REDIS_PREFIX_LINK_STATS_UV + fullShortUrl, each);
+                            uvEmptyFlag.set(uvAdded != null && uvAdded > 0L);
                         }, addResponseCookieTask);
 
             } else {
+                // 认为用户第一次访问，直接加 Cookie 就行
                 addResponseCookieTask.run();
             }
-            // 获取当前用户 IP 地址
             String remoteAddr = LinkUtil.getRealIp((HttpServletRequest) request);
             // TODO 和前面的 UV 一样的问题，如何保证大数据量不会将内存撑爆
-            Long uipAdded = stringRedisTemplate.opsForSet().add("short-link:statistics:uip:" + fullShortUrl, remoteAddr);
+            Long uipAdded = stringRedisTemplate.opsForSet().add(REDIS_PREFIX_LINK_STATS_UIP + fullShortUrl, remoteAddr);
             boolean uipEmptyFlag = uipAdded != null && uipAdded > 0;
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
@@ -429,7 +436,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .date(new Date())
                     .build();
             shortLinkStatsMapper.shortLinkStatistics(statisticsDO);
-            // 短链接访问地区统计
+            /*
+             * 短链接监控之地区
+             */
             Map<String, Object> localeParamMap = new HashMap<>();
             localeParamMap.put("key", statisticsLocaleAmapKey);
             localeParamMap.put("ip", remoteAddr);
@@ -502,6 +511,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }
+    }
+
+    /**
+     * 短链接信息统计之基础信息统计（PV，UV，UIP）
+     */
+    private void basicStatistics(String gid, String fullShortUrl, HttpServletRequest request, HttpServletResponse response) throws Throwable {
+
     }
 
     @SneakyThrows

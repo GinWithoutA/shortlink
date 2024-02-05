@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDeviceStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkNetworkStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
@@ -33,6 +34,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
     private final ShortLinkStatsBrowserMapper statsBrowserMapper;
     private final ShortLinkOsStatsMapper statsOsMapper;
     private final ShortLinkDeviceStatsMapper statsDeviceMapper;
+    private final ShortLinkNetworkStatsMapper statsNetworkMapper;
 
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStatistics(ShortLinkStatsReqDTO requestParam) {
@@ -216,6 +218,24 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .ratio(actualRatio)
                     .build();
             deviceStats.add(deviceRespDTO);
+        });
+        /*
+         * 短链接监控之网络
+         */
+        List<ShortLinkStatsNetworkRespDTO> networkStats = new ArrayList<>();
+        List<ShortLinkNetworkStatisticsDO> listNetworkStatsByShortLink = statsNetworkMapper.listNetworkStatsByShortLink(requestParam);
+        int networkSum = listNetworkStatsByShortLink.stream()
+                .mapToInt(ShortLinkNetworkStatisticsDO::getCnt)
+                .sum();
+        listNetworkStatsByShortLink.forEach(each -> {
+            double ratio = (double) each.getCnt() / networkSum;
+            double actualRatio = Math.round(ratio * 100.0) / 100.0;
+            ShortLinkStatsNetworkRespDTO networkRespDTO = ShortLinkStatsNetworkRespDTO.builder()
+                    .cnt(each.getCnt())
+                    .network(each.getNetwork())
+                    .ratio(actualRatio)
+                    .build();
+            networkStats.add(networkRespDTO);
         });
     }
 }

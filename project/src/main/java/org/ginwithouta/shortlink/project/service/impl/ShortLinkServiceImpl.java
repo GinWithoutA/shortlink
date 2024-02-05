@@ -88,7 +88,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
     private final ShortLinkDeviceStatsMapper shortLinkDeviceStatisticsMapper;
     private final ShortLinkStatsLocaleMapper shortLinkStatsLocaleMapper;
-    private final ShortLinkNetworkStatisticsMapper shortLinkNetworkStatisticsMapper;
+    private final ShortLinkNetworkStatsMapper shortLinkNetworkStatisticsMapper;
     private final ShortLinkStatsBrowserMapper shortLinkStatsBrowserMapper;
 
     @Value("${short-link.statistics.locale.amap-key}")

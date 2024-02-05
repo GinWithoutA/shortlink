@@ -3,14 +3,18 @@ package org.ginwithouta.shortlink.project.dao.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkNetworkStatisticsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
+
+import java.util.List;
 
 /**
  * @author Ginwithouta
  * Generate at 2023/11/29
  * 短链接访问网络统计访问持久层
  */
-public interface ShortLinkNetworkStatisticsMapper extends BaseMapper<ShortLinkNetworkStatisticsDO> {
+public interface ShortLinkNetworkStatsMapper extends BaseMapper<ShortLinkNetworkStatisticsDO> {
 
     /**
      * 记录网络访问监控数据
@@ -24,4 +28,14 @@ public interface ShortLinkNetworkStatisticsMapper extends BaseMapper<ShortLinkNe
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{networkStatisticsDO.cnt}, update_time = NOW();")
     void shortLinkNetworkStatistics(@Param("networkStatisticsDO") ShortLinkNetworkStatisticsDO networkStatisticsDO);
+
+    /**
+     * 根据单个短链接访问网络类型访问监控数据
+     */
+    @Select("SELECT network, SUM(cnt) AS cnt FROM t_network_statistics WHERE " +
+            "    full_short_url = #{requestParam.fullShortUrl} " +
+            "    AND gid = #{requestParam.gid} " +
+            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY full_short_url, gid, network;")
+    List<ShortLinkNetworkStatisticsDO> listNetworkStatsByShortLink(ShortLinkStatsReqDTO requestParam);
 }

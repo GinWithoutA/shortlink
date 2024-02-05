@@ -5,14 +5,8 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
-import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateBatchReqDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkCreateReqDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkPageReqDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkUpdateReqDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateBatchRespDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkCreateRespDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
-import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.req.*;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.*;
 
 import java.util.HashMap;
 import java.util.List;

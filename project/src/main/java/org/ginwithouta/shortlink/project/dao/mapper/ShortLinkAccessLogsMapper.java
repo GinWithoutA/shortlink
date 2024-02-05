@@ -30,4 +30,16 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "ORDER BY count DESC " +
             "LIMIT 5;")
     List<HashMap<String, Object>> listTopIpByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据短链接获取指定日期内的访客类型
+     */
+    @Select("SELECT SUM(old_user) AS oldUserCnt, SUM(new_user) AS newUserCnt FROM ( " +
+            "   SELECT " +
+            "       CASE WHEN COUNT(DISTINCT DATE(create_time)) > 1 THEN 1 ELSE 0 END AS old_user, " +
+            "       CASE WHEN COUNT(DISTINCT DATE(create_time)) = 1 AND MAX(create_time) >= #{requestParam.startDate} AND MAX(create_time) <= #{requestParam.endDate} THEN 1 ELSE 0 END AS new_user " +
+            "   FROM t_access_logs WHERE full_short_url = #{requestParam.fullShortUrl} AND gid = #{requestParam.gid} " +
+            "   GROUP BY user ) " +
+            "AS user_counts;")
+    HashMap<String, Object> findUvTypeCntByShortLink(ShortLinkStatsReqDTO requestParam);
 }

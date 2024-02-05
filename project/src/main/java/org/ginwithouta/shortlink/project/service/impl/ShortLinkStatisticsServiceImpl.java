@@ -14,10 +14,7 @@ import org.ginwithouta.shortlink.project.dto.resp.*;
 import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -166,5 +163,43 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .build();
             osStats.add(osRespDTO);
         });
+        /*
+         * 短链接监控之访客类型（指定时间内的访客：新房客，老访客）
+         */
+        List<ShortLinkStatsUvRespDTO> uvTypeStats = new ArrayList<>();
+        HashMap<String, Object> findUvTypeByShortLink = accessLogsMapper.findUvTypeCntByShortLink(requestParam);
+        int oldUserCnt = Integer.parseInt(
+                Optional.ofNullable(findUvTypeByShortLink)
+                        .map(each -> each.get("oldUserCnt"))
+                        .map(Object::toString)
+                        .orElse("0")
+        );
+        int newUserCnt = Integer.parseInt(
+                Optional.ofNullable(findUvTypeByShortLink)
+                        .map(each -> each.get("newUserCnt"))
+                        .map(Object::toString)
+                        .orElse("0")
+        );
+        int uvSum = oldUserCnt + newUserCnt;
+        double oldRatio = (double) oldUserCnt / uvSum;
+        double actualOldRatio = Math.round(oldRatio * 100.0) / 100.0;
+        double newRatio = (double) newUserCnt / uvSum;
+        double actualNewRatio = Math.round(newRatio * 100.0) / 100.0;
+        ShortLinkStatsUvRespDTO newUvRespDTO = ShortLinkStatsUvRespDTO.builder()
+                .uvType("newUser")
+                .cnt(newUserCnt)
+                .ratio(actualNewRatio)
+                .build();
+        uvTypeStats.add(newUvRespDTO);
+        ShortLinkStatsUvRespDTO oldUvRespDTO = ShortLinkStatsUvRespDTO.builder()
+                .uvType("oldUser")
+                .cnt(oldUserCnt)
+                .ratio(actualOldRatio)
+                .build();
+        uvTypeStats.add(oldUvRespDTO);
+        /*
+         * 短链接监控之访问设备
+         */
+
     }
 }

@@ -27,10 +27,7 @@ import org.ginwithouta.shortlink.project.common.convention.exception.ClientExcep
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateBatchReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkCreateReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkUpdateReqDTO;
+import org.ginwithouta.shortlink.project.dto.req.*;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
@@ -526,6 +523,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .gid(gid)
                     .build();
             shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
+            /*
+             * 短链接数据自增（PV UV UIP）
+             */
+            StatsIncrementMapperDTO incrementMapperDTO = StatsIncrementMapperDTO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .totalUv(uvEmptyFlag.get() ? 1 : 0)
+                    .totalPv(1)
+                    .totalUip(uipEmptyFlag ? 1 : 0)
+                    .build();
+            baseMapper.incrementStats(incrementMapperDTO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

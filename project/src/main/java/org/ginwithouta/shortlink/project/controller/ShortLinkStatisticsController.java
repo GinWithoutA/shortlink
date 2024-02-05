@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsRespDTO;
 import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
@@ -39,6 +41,14 @@ public class ShortLinkStatisticsController {
     @GetMapping(value = "access/record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         return Results.success(shortLinkStatisticsService.shortLinkStatsAccessRecord(requestParam));
+    }
+
+    /**
+     * 分组短链接详细监控数据访问
+     */
+    @GetMapping(value = "group")
+    public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+        return Results.success(shortLinkStatisticsService.groupShortLinkStatistics(requestParam));
     }
 
 

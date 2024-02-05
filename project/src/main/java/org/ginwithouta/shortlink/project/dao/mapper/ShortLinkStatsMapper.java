@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
 import java.util.List;
@@ -42,6 +43,16 @@ public interface ShortLinkStatsMapper extends BaseMapper<ShortLinkStatsDO> {
     List<ShortLinkStatsDO> listStatisticsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
+     * 查询分组短链接的监控记录
+     * @param requestParam 短链接请求入参
+     * @return 短链接监控记录
+     */
+    @Select("SELECT date, SUM(pv) AS pv, SUM(uv) as uv, SUM(uip) as uip FROM t_statistics " +
+            "WHERE gid = ${requestParam.gid} AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid, date;")
+    List<ShortLinkStatsDO> listStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
      * 根据短链接获取访问的小时分布情况
      * @param requestParam 短链接请求入参
      * @return 短链接小时监控数据
@@ -53,10 +64,33 @@ public interface ShortLinkStatsMapper extends BaseMapper<ShortLinkStatsDO> {
             "GROUP BY full_short_url, gid, hour;")
     List<ShortLinkStatsDO> listHoursStatisticsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
+    /**
+     * 根据短链接分组获取访问的小时分布情况
+     * @param requestParam 短链接请求入参
+     * @return 短链接分组小时监控数据
+     */
+    @Select("SELECT hour, SUM(pv) AS pv FROM t_statistics " +
+            "WHERE gid = #{requestParam.gid} " +
+            "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid, hour;")
+    List<ShortLinkStatsDO> listHoursStatisticsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
+     * 根据短链接获取访问的一周分布情况
+     */
     @Select("SELECT weekday, SUM(pv) AS pv FROM t_statistics " +
             "WHERE full_short_url = #{requestParam.fullShortUrl} " +
             "   AND gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, weekday;")
     List<ShortLinkStatsDO> listWeekStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据短链接获取访问的一周分布情况
+     */
+    @Select("SELECT weekday, SUM(pv) AS pv FROM t_statistics " +
+            "WHERE gid = #{requestParam.gid} " +
+            "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid, weekday;")
+    List<ShortLinkStatsDO> listWeekStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

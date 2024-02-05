@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDeviceStatisticsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
 import java.util.List;
@@ -38,4 +39,13 @@ public interface ShortLinkDeviceStatsMapper extends BaseMapper<ShortLinkDeviceSt
             "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, device;")
     List<ShortLinkDeviceStatisticsDO> listDeviceStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 短链接监控之访问设备响应 DTO
+     */
+    @Select("SELECT device, SUM(cnt) AS cnt FROM t_device_statistics WHERE " +
+            "    gid = #{requestParam.gid} " +
+            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY gid, device;")
+    List<ShortLinkDeviceStatisticsDO> listDeviceStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

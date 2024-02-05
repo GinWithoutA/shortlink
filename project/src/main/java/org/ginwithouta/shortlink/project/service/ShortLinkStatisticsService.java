@@ -3,8 +3,10 @@ package org.ginwithouta.shortlink.project.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsRespDTO;
 
@@ -25,4 +27,11 @@ public interface ShortLinkStatisticsService extends IService<ShortLinkStatsDO> {
      * 访问单个短链接指定时间内访问记录监控数据
      */
     IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam);
+
+    /**
+     * 获取指定时间内分组短链接的监控数据
+     * @param requestParam 请求参数（分组标识，开始时间，结束时间）
+     * @return  分组短链接指定时间内的监控数据
+     */
+    ShortLinkGroupStatsRespDTO groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam);
 }

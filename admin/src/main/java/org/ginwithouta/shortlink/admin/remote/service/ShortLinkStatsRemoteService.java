@@ -6,8 +6,10 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
 
@@ -32,6 +34,11 @@ public interface ShortLinkStatsRemoteService {
      */
     default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         String resultBodyStr = HttpUtil.get(URL_PREFIX + "access/record", BeanUtil.beanToMap(requestParam));
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
+    }
+
+    default Result<ShortLinkGroupStatsRespDTO> groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam) {
+        String resultBodyStr = HttpUtil.get(URL_PREFIX + "group", BeanUtil.beanToMap(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
     }
 }

@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkAccessLogsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.UvTypeMapperDTO;
@@ -36,6 +37,17 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
     List<HashMap<String, Object>> listTopIpByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
+     * 根据短链接分组获取指定日期内高频访问 IP （TOP 5）
+     * @param requestParam 短链接请求入参
+     * @return  高频访问 IP
+     */
+    @Select("SELECT ip, COUNT(ip) AS count FROM t_access_logs " +
+            "WHERE gid = #{requestParam.gid} " +
+            "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid, ip ORDER BY count DESC LIMIT 5;")
+    List<HashMap<String, Object>> listTopIpByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
      * 根据短链接获取指定日期内的访客类型
      */
     @Select("SELECT SUM(old_user) AS oldUserCnt, SUM(new_user) AS newUserCnt FROM ( " +
@@ -45,7 +57,7 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "   FROM t_access_logs WHERE full_short_url = #{requestParam.fullShortUrl} AND gid = #{requestParam.gid} " +
             "   GROUP BY user ) " +
             "AS user_counts;")
-    HashMap<String, Object> findUvTypeCntByShortLink(ShortLinkStatsReqDTO requestParam);
+    HashMap<String, Object> findUvTypeCntByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
      * 查询用户列表中哪些是老用户，哪些是新用户
@@ -64,6 +76,21 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
     List<Map<String, Object>> selectUvTypeByUsers(@Param("requestParam") UvTypeMapperDTO requestParam, @Param("userAccessLogsList") List<String> userAccessLogsList);
 
     /**
+     * 查询用户列表中哪些是老用户，哪些是新用户
+     */
+    @Select("<script> " +
+            "   SELECT user, " +
+            "       CASE WHEN MIN(create_time) BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} THEN '新访客' ELSE '老访客' END AS uvType " +
+            "   FROM t_access_logs WHERE" +
+            "       gid = #{requestParam.gid} AND user IN " +
+            "           <foreach item=\"item\" index=\"index\" collection=\"userAccessLogsList\" open=\"(\" separator=\",\" close=\")\"> " +
+            "               #{item}" +
+            "           </foreach> " +
+            "   GROUP BY user; " +
+            "</script> ")
+    HashMap<String, Object> findUvTypeCntByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
      * 根据短链接获取指定日期内基础数据
      */
     @Select("SELECT COUNT(user) AS pv, COUNT(DISTINCT user) AS uv, COUNT(DISTINCT ip) AS uip FROM t_access_logs " +
@@ -73,4 +100,13 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "   AND create_time BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid;")
     ShortLinkStatsDO getPvUvUipByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据分组获取指定日期内所有短链接基础数据
+     */
+    @Select("SELECT COUNT(user) AS pv, COUNT(DISTINCT user) AS uv, COUNT(DISTINCT ip) AS uip FROM t_access_logs " +
+            "WHERE gid = #{requestParam.gid} " +
+            "   AND create_time BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid;")
+    ShortLinkStatsDO getPvUvUipByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

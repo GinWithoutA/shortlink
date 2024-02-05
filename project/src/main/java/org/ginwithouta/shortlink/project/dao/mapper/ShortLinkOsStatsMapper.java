@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkOsStatisticsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
 import java.util.HashMap;
@@ -39,4 +40,12 @@ public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatistics
             "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, os;")
     List<HashMap<String, Object>> listOsStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据短链接获取操作系统监控记录
+     */
+    @Select("SELECT os, SUM(cnt) AS count FROM t_os_statistics WHERE gid = #{requestParam.gid} " +
+            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY gid, os;")
+    List<HashMap<String, Object>> listOsStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

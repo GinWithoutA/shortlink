@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
 import java.util.List;
@@ -41,4 +42,15 @@ public interface ShortLinkStatsLocaleMapper extends BaseMapper<ShortLinkLocaleSt
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, province;")
     List<ShortLinkLocaleStatisticsDO> listLocaleByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据短链接分组获取指定日期范围的地区监控记录
+     * @param requestParam 请求入参
+     * @return 指定日期的监控记录
+     */
+    @Select("SELECT province, SUM(cnt) AS cnt FROM t_locale_statistics " +
+            "WHERE gid = #{requestParam.gid} " +
+            "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY gid, province;")
+    List<ShortLinkLocaleStatisticsDO> listLocaleByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

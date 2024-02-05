@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
 import org.ginwithouta.shortlink.project.common.convention.result.Results;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsRespDTO;
@@ -36,6 +38,14 @@ public class ShortLinkStatisticsController {
     }
 
     /**
+     * 分组短链接详细监控数据访问
+     */
+    @GetMapping(value = "group")
+    public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+        return Results.success(shortLinkStatisticsService.groupShortLinkStatistics(requestParam));
+    }
+
+    /**
      * 单个短链接访问日志监控数据
      */
     @GetMapping(value = "access/record")
@@ -44,12 +54,11 @@ public class ShortLinkStatisticsController {
     }
 
     /**
-     * 分组短链接详细监控数据访问
+     * 分组短链接访问日志监控数据
      */
-    @GetMapping(value = "group")
-    public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
-        return Results.success(shortLinkStatisticsService.groupShortLinkStatistics(requestParam));
+    @GetMapping(value = "access/record/group")
+    public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return Results.success(shortLinkStatisticsService.shortLinkGroupStatsAccessRecord(requestParam));
     }
-
 
 }

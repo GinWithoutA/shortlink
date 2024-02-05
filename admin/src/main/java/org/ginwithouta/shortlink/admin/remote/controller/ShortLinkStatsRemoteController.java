@@ -2,10 +2,11 @@ package org.ginwithouta.shortlink.admin.remote.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
-import org.ginwithouta.shortlink.admin.common.convention.result.Results;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
@@ -47,5 +48,13 @@ public class ShortLinkStatsRemoteController {
     @GetMapping(value = "access/record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         return linkStatsRemoteService.shortLinkStatsAccessRecord(requestParam);
+    }
+
+    /**
+     * 分组短链接访问日志监控数据
+     */
+    @GetMapping(value = "access/record/group")
+    public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return linkStatsRemoteService.shortLinkGroupStatsAccessRecord(requestParam);
     }
 }

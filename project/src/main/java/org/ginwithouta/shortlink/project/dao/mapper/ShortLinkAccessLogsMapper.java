@@ -5,10 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkAccessLogsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.UvTypeMapperDTO;
+import org.ginwithouta.shortlink.project.dto.req.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +71,21 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "   GROUP BY user; " +
             "</script> ")
     List<Map<String, Object>> selectUvTypeByUsers(@Param("requestParam") UvTypeMapperDTO requestParam, @Param("userAccessLogsList") List<String> userAccessLogsList);
+
+    /**
+     * 查询用户列表中哪些是老用户，哪些是新用户
+     */
+    @Select("<script> " +
+            "   SELECT user, " +
+            "       CASE WHEN MIN(create_time) BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} THEN '新访客' ELSE '老访客' END AS uvType " +
+            "   FROM t_access_logs WHERE" +
+            "       gid = #{requestParam.gid} AND user IN " +
+            "           <foreach item=\"item\" index=\"index\" collection=\"userAccessLogsList\" open=\"(\" separator=\",\" close=\")\"> " +
+            "               #{item}" +
+            "           </foreach> " +
+            "   GROUP BY user; " +
+            "</script> ")
+    List<Map<String, Object>> selectGroupUvTypeByUsers(@Param("requestParam") UvTypeGroupMapperDTO bean,  @Param("userAccessLogsList") List<String> userAccessLogsList);
 
     /**
      * 查询用户列表中哪些是老用户，哪些是新用户

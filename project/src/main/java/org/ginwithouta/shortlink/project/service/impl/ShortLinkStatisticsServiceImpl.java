@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
-import org.ginwithouta.shortlink.project.dto.req.UvTypeMapperDTO;
+import org.ginwithouta.shortlink.project.dto.req.*;
 import org.ginwithouta.shortlink.project.dto.resp.*;
 import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
 import org.springframework.stereotype.Service;
@@ -500,6 +497,31 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
         List<Map<String, Object>> uvTypeList = accessLogsMapper.selectUvTypeByUsers(BeanUtil.toBean(requestParam, UvTypeMapperDTO.class), userAccessLogsList);
         actualResult.getRecords().forEach(each -> {
             String uvType = uvTypeList.stream()
+                    // 用户在列表中，根据列表中的 uvType 指定用户类型，如果不在，就是旧访客
+                    .filter(item -> Objects.equals(item.get("user"), each.getUser()))
+                    .findFirst()
+                    .map(item -> item.get("uvType").toString())
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+        return actualResult;
+    }
+
+    @Override
+    public IPage<ShortLinkGroupStatsAccessRecordRespDTO> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        LambdaQueryWrapper<ShortLinkAccessLogsDO> lambdaQueryWrapper = Wrappers.lambdaQuery(ShortLinkAccessLogsDO.class)
+                .eq(ShortLinkAccessLogsDO::getGid, requestParam.getGid())
+                .between(ShortLinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
+                .orderByDesc(ShortLinkAccessLogsDO::getCreateTime);
+        IPage<ShortLinkAccessLogsDO> accessDoPages = accessLogsMapper.selectPage(requestParam, lambdaQueryWrapper);
+        List<String> userAccessLogsList = accessDoPages.getRecords()
+                .stream()
+                .map(ShortLinkAccessLogsDO::getUser)
+                .toList();
+        IPage<ShortLinkGroupStatsAccessRecordRespDTO> actualResult = accessDoPages.convert(each -> BeanUtil.toBean(each, ShortLinkGroupStatsAccessRecordRespDTO.class));
+        List<Map<String, Object>> uvTypeGroupList = accessLogsMapper.selectGroupUvTypeByUsers(BeanUtil.toBean(requestParam, UvTypeGroupMapperDTO.class), userAccessLogsList);
+        actualResult.getRecords().forEach(each -> {
+            String uvType = uvTypeGroupList.stream()
                     // 用户在列表中，根据列表中的 uvType 指定用户类型，如果不在，就是旧访客
                     .filter(item -> Objects.equals(item.get("user"), each.getUser()))
                     .findFirst()

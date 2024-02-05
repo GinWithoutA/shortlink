@@ -6,12 +6,16 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
+import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.ShortLinkStatsReqDTO;
+import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkStatsRespDTO;
+
+import java.util.Map;
 
 /**
  * @author Ginwithouta
@@ -30,15 +34,32 @@ public interface ShortLinkStatsRemoteService {
     }
 
     /**
-     * 单个短链接指定时间内监控记录数据
+     * 分组短链接的详细监控信息
      */
-    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
-        String resultBodyStr = HttpUtil.get(URL_PREFIX + "access/record", BeanUtil.beanToMap(requestParam));
+    default Result<ShortLinkGroupStatsRespDTO> groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam) {
+        String resultBodyStr = HttpUtil.get(URL_PREFIX + "group", BeanUtil.beanToMap(requestParam));
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
     }
 
-    default Result<ShortLinkGroupStatsRespDTO> groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam) {
-        String resultBodyStr = HttpUtil.get(URL_PREFIX + "group", BeanUtil.beanToMap(requestParam));
+    /**
+     * 单个短链接指定时间内监控记录数据
+     */
+    default Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam, false, true);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String resultBodyStr = HttpUtil.get(URL_PREFIX + "access/record", stringObjectMap);
+        return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
+    }
+
+    /**
+     * 分组短链接指定时间内监控记录数据
+     */
+    default Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(requestParam, false, true);
+        stringObjectMap.remove("orders");
+        stringObjectMap.remove("records");
+        String resultBodyStr = HttpUtil.get(URL_PREFIX + "access/record/group", stringObjectMap);
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {});
     }
 }

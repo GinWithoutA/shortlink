@@ -86,7 +86,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsMapper shortLinkStatsMapper;
     private final ShortLinkOsStatsMapper shortLinkOsStatisticsMapper;
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
-    private final ShortLinkDeviceStatisticsMapper shortLinkDeviceStatisticsMapper;
+    private final ShortLinkDeviceStatsMapper shortLinkDeviceStatisticsMapper;
     private final ShortLinkStatsLocaleMapper shortLinkStatsLocaleMapper;
     private final ShortLinkNetworkStatisticsMapper shortLinkNetworkStatisticsMapper;
     private final ShortLinkStatsBrowserMapper shortLinkStatsBrowserMapper;

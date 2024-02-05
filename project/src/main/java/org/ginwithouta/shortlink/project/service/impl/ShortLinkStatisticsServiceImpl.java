@@ -6,6 +6,7 @@ import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDeviceStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
@@ -31,6 +32,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
     private final ShortLinkAccessLogsMapper accessLogsMapper;
     private final ShortLinkStatsBrowserMapper statsBrowserMapper;
     private final ShortLinkOsStatsMapper statsOsMapper;
+    private final ShortLinkDeviceStatsMapper statsDeviceMapper;
 
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStatistics(ShortLinkStatsReqDTO requestParam) {
@@ -200,6 +202,20 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
         /*
          * 短链接监控之访问设备
          */
-
+        List<ShortLinkStatsDeviceRespDTO> deviceStats = new ArrayList<>();
+        List<ShortLinkDeviceStatisticsDO> listDeviceStatsByShortLink = statsDeviceMapper.listDeviceStatsByShortLink(requestParam);
+        int deviceSum = listDeviceStatsByShortLink.stream()
+                .mapToInt(ShortLinkDeviceStatisticsDO::getCnt)
+                .sum();
+        listDeviceStatsByShortLink.forEach(each -> {
+            double ratio = (double) each.getCnt() / deviceSum;
+            double actualRatio = Math.round(ratio * 100.0) / 100.0;
+            ShortLinkStatsDeviceRespDTO deviceRespDTO = ShortLinkStatsDeviceRespDTO.builder()
+                    .cnt(each.getCnt())
+                    .device(each.getDevice())
+                    .ratio(actualRatio)
+                    .build();
+            deviceStats.add(deviceRespDTO);
+        });
     }
 }

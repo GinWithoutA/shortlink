@@ -270,10 +270,10 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
         List<Map<String, Object>> uvTypeList = accessLogsMapper.selectUvTypeByUsers(BeanUtil.toBean(requestParam, UvTypeMapperDTO.class), userAccessLogsList);
         actualResult.getRecords().forEach(each -> {
             String uvType = uvTypeList.stream()
+                    // 用户在列表中，根据列表中的 uvType 指定用户类型，如果不在，就是旧访客
                     .filter(item -> Objects.equals(item.get("user"), each.getUser()))
                     .findFirst()
-                    .map(item -> item.get("user"))
-                    .map(Object::toString)
+                    .map(item -> item.get("uvType").toString())
                     .orElse("旧访客");
             each.setUvType(uvType);
         });

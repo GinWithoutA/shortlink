@@ -60,7 +60,7 @@ public class ShortLinkTableShardingTest {
                 update_time    datetime                      null comment '修改时间',
                 del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
                 constraint `idx_unique_full-short-url`
-                    unique (full_short_url)
+                                                   unique (full_short_url, gid, date)
             )
                 charset = utf8mb4;
             """;

@@ -47,6 +47,10 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
             return null;
         }
         /*
+         * 获取短链接现有 PV UV UIP
+         */
+        ShortLinkStatsDO pvUvUipByShortLink = accessLogsMapper.getPvUvUipByShortLink(requestParam);
+        /*
          * 短链接监控之基础数据（PV，UV，UIP）
          */
         List<ShortLinkStatsDailyRespDTO> dailyStats = new ArrayList<>();
@@ -241,6 +245,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
             networkStats.add(networkRespDTO);
         });
         return ShortLinkStatsRespDTO.builder()
+                .pv(pvUvUipByShortLink.getPv())
+                .uv(pvUvUipByShortLink.getUv())
+                .uip(pvUvUipByShortLink.getUip())
                 .daily(dailyStats)
                 .localeCnStats(localeCNStats)
                 .hourStats(hoursStats)

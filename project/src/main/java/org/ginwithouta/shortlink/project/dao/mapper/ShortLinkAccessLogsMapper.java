@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkAccessLogsDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.UvTypeMapperDTO;
@@ -61,4 +62,15 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "   GROUP BY user; " +
             "</script> ")
     List<Map<String, Object>> selectUvTypeByUsers(@Param("requestParam") UvTypeMapperDTO requestParam, @Param("userAccessLogsList") List<String> userAccessLogsList);
+
+    /**
+     * 根据短链接获取指定日期内基础数据
+     */
+    @Select("SELECT COUNT(user) AS pv, COUNT(DISTINCT user) AS uv, COUNT(DISTINCT ip) AS uip FROM t_access_logs " +
+            "WHERE " +
+            "   full_short_url = #{requestParam.fullShortUrl} " +
+            "   AND gid = #{requestParam.gid} " +
+            "   AND create_time BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
+            "GROUP BY full_short_url, gid;")
+    ShortLinkStatsDO getPvUvUipByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 }

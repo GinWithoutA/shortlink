@@ -87,6 +87,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsLocaleMapper shortLinkStatsLocaleMapper;
     private final ShortLinkNetworkStatsMapper shortLinkNetworkStatisticsMapper;
     private final ShortLinkStatsBrowserMapper shortLinkStatsBrowserMapper;
+    private final ShortLinkStatsTodayMapper shortLinkStatsTodayMapper;
 
     @Value("${short-link.statistics.locale.amap-key}")
     private String statisticsLocaleAMapKey;
@@ -534,6 +535,18 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .totalUip(uipEmptyFlag ? 1 : 0)
                     .build();
             baseMapper.incrementStats(incrementMapperDTO);
+            /*
+             * 短链接监控之今日数据
+             */
+            ShortLinkStatsTodayDO statsTodayDO = ShortLinkStatsTodayDO.builder()
+                    .todayUv(uvEmptyFlag.get() ? 1 : 0)
+                    .todayPv(1)
+                    .todayUip(uipEmptyFlag ? 1 : 0)
+                    .gid(gid)
+                    .fullShortUrl(fullShortUrl)
+                    .date(new Date())
+                    .build();
+            shortLinkStatsTodayMapper.shortLinkTodayStats(statsTodayDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

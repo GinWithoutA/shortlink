@@ -70,4 +70,34 @@ public class ShortLinkPageRespDTO {
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime createTime;
+
+    /**
+     * 历史 PV
+     */
+    private Integer totalPv;
+
+    /**
+     * 历史 UV
+     */
+    private Integer totalUv;
+
+    /**
+     * 历史 UIP
+     */
+    private Integer totalUip;
+
+    /**
+     * 今日 PV
+     */
+    private Integer todayPv;
+
+    /**
+     * 今日 UV
+     */
+    private Integer todayUv;
+
+    /**
+     * 今日 UIP
+     */
+    private Integer todayUip;
 }

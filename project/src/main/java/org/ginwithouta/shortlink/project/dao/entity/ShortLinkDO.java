@@ -80,4 +80,19 @@ public class ShortLinkDO extends BaseDO {
      */
     private String description;
 
+    /**
+     * 历史 PV
+     */
+    private Integer totalPv;
+
+    /**
+     * 历史 UV
+     */
+    private Integer totalUv;
+
+    /**
+     * 历史 UIP
+     */
+    private Integer totalUip;
+
 }

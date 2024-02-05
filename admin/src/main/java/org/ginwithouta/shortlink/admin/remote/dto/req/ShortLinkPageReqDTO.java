@@ -18,4 +18,9 @@ public class ShortLinkPageReqDTO extends Page {
      * 分组标识
      */
     private String gid;
+
+    /**
+     * 排序标识（是按照 IP UV PV 的今日还是累积排序）
+     */
+    private String orderTag;
 }

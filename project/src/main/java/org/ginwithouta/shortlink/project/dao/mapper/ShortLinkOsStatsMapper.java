@@ -3,14 +3,19 @@ package org.ginwithouta.shortlink.project.dao.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkOsStatisticsDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
+
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * @author Ginwithouta
  * Generate at 2023/11/29
  * 短链接操作系统统计访问持久层
  */
-public interface ShortLinkOsStatisticsMapper extends BaseMapper<ShortLinkOsStatisticsDO> {
+public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatisticsDO> {
 
     /**
      * 记录操作系统访问监控数据
@@ -24,4 +29,14 @@ public interface ShortLinkOsStatisticsMapper extends BaseMapper<ShortLinkOsStati
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{osStatisticsDO.cnt}, update_time = NOW();")
     void shortLinkOsStatistics(@Param("osStatisticsDO") ShortLinkOsStatisticsDO osStatisticsDO);
+
+    /**
+     * 根据短链接获取操作系统监控记录
+     */
+    @Select("SELECT os, SUM(cnt) AS count FROM t_os_statistics WHERE " +
+            "    full_short_url = #{requestParam.fullShortUrl} " +
+            "    AND gid = #{requestParam.gid} " +
+            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY full_short_url, gid, os;")
+    List<HashMap<String, Object>> listOsStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 }

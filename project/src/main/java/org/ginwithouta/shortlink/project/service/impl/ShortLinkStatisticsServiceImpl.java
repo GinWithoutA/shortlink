@@ -8,10 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkAccessLogsMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkStatsLocaleMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkStatsBrowserMapper;
-import org.ginwithouta.shortlink.project.dao.mapper.ShortLinkStatsMapper;
+import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.resp.*;
 import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
@@ -36,6 +33,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
     private final ShortLinkStatsLocaleMapper statsLocaleMapper;
     private final ShortLinkAccessLogsMapper accessLogsMapper;
     private final ShortLinkStatsBrowserMapper statsBrowserMapper;
+    private final ShortLinkOsStatsMapper statsOsMapper;
 
     @Override
     public ShortLinkStatsRespDTO oneShortLinkStatistics(ShortLinkStatsReqDTO requestParam) {
@@ -150,6 +148,23 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .build();
             browserStats.add(shortLinkStatsBrowserRespDTO);
         });
-        return null;
+        /*
+         * 短链接监控之操作系统
+         */
+        List<ShortLinkStatsOsRespDTO> osStats = new ArrayList<>();
+        List<HashMap<String, Object>> listOsStatsByShortLink = statsOsMapper.listOsStatsByShortLink(requestParam);
+        int osSum = listOsStatsByShortLink.stream()
+                .mapToInt(each -> Integer.parseInt(each.get("count").toString()))
+                .sum();
+        listOsStatsByShortLink.forEach(each -> {
+            double ratio = (double) Integer.parseInt(each.get("count").toString()) / osSum;
+            double actualRatio = Math.round(ratio * 100.0) / 100.0;
+            ShortLinkStatsOsRespDTO osRespDTO = ShortLinkStatsOsRespDTO.builder()
+                    .cnt(Integer.parseInt(each.get("count").toString()))
+                    .os(each.get("os").toString())
+                    .ratio(actualRatio)
+                    .build();
+            osStats.add(osRespDTO);
+        });
     }
 }

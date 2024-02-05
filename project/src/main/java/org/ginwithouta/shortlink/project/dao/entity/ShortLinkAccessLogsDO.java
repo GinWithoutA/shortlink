@@ -52,4 +52,19 @@ public class ShortLinkAccessLogsDO extends BaseDO {
      * 用户信息
      */
     private String user;
+
+    /**
+     * 访问地区
+     */
+    private String locale;
+
+    /**
+     * 访问设备
+     */
+    private String device;
+
+    /**
+     * 访问网络类型
+     */
+    private String network;
 }

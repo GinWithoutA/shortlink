@@ -445,14 +445,15 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             String localeResultStr = HttpUtil.get(AMAP_REMOTE_URL, localeParamMap);
             JSONObject localeResultObj = JSON.parseObject(localeResultStr);
             String infocode = localeResultObj.getString("infocode");
+            String actualCity = null, actualProvince = null;
             ShortLinkLocaleStatisticsDO localeStatisticsDO;
             if (StrUtil.isNotBlank(infocode) && StrUtil.equals(infocode, "10000")) {
                 String province = localeResultObj.getString("province");
                 boolean unknownFlag = StrUtil.equals(province, "[]");
                 localeStatisticsDO = ShortLinkLocaleStatisticsDO.builder()
                         .fullShortUrl(fullShortUrl)
-                        .province(unknownFlag ? "未知" : province)
-                        .city(unknownFlag ? "未知" : localeResultObj.getString("city"))
+                        .province(actualProvince = unknownFlag ? "未知" : province)
+                        .city(actualCity = unknownFlag ? "未知" : localeResultObj.getString("city"))
                         .adcode(unknownFlag ? "未知" : localeResultObj.getString("adcode"))
                         .country("中国")
                         .gid(gid)
@@ -485,6 +486,30 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .build();
             shortLinkStatsBrowserMapper.shortLinkBrowserStatistics(shortLinkStatsBrowserDO);
             /*
+             * 短链接监控之设备
+             */
+            String device = LinkUtil.getDevice((HttpServletRequest) request);
+            ShortLinkDeviceStatisticsDO shortLinkDeviceStatisticsDO = ShortLinkDeviceStatisticsDO.builder()
+                    .device(device)
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkDeviceStatisticsMapper.shortLinkDeviceStatistics(shortLinkDeviceStatisticsDO);
+            /*
+             * 短链接监控之网络
+             */
+            String network = LinkUtil.getNetwork(remoteAddr);
+            ShortLinkNetworkStatisticsDO shortLinkNetworkStatisticsDO = ShortLinkNetworkStatisticsDO.builder()
+                    .network(network)
+                    .fullShortUrl(fullShortUrl)
+                    .cnt(1)
+                    .gid(gid)
+                    .date(new Date())
+                    .build();
+            shortLinkNetworkStatisticsMapper.shortLinkNetworkStatistics(shortLinkNetworkStatisticsDO);
+            /*
              * 短链接监控之访问日志
              *  （1）高频 IP
              *  （2）访客类型
@@ -495,31 +520,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .browser(browser)
                     .os(os)
                     .fullShortUrl(fullShortUrl)
+                    .network(network)
+                    .locale(StrUtil.join("-", "中国", actualProvince, actualCity))
+                    .device(device)
                     .gid(gid)
                     .build();
             shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
-            /*
-             * 短链接监控之设备
-             */
-            ShortLinkDeviceStatisticsDO shortLinkDeviceStatisticsDO = ShortLinkDeviceStatisticsDO.builder()
-                    .device(LinkUtil.getDevice((HttpServletRequest) request))
-                    .fullShortUrl(fullShortUrl)
-                    .cnt(1)
-                    .gid(gid)
-                    .date(new Date())
-                    .build();
-            shortLinkDeviceStatisticsMapper.shortLinkDeviceStatistics(shortLinkDeviceStatisticsDO);
-            /*
-             * 短链接监控之网络
-             */
-            ShortLinkNetworkStatisticsDO shortLinkNetworkStatisticsDO = ShortLinkNetworkStatisticsDO.builder()
-                    .network(LinkUtil.getNetwork(remoteAddr))
-                    .fullShortUrl(fullShortUrl)
-                    .cnt(1)
-                    .gid(gid)
-                    .date(new Date())
-                    .build();
-            shortLinkNetworkStatisticsMapper.shortLinkNetworkStatistics(shortLinkNetworkStatisticsDO);
         } catch (Throwable e) {
             log.error("短链接跳转失败", e);
         }

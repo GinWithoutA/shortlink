@@ -56,6 +56,7 @@ public interface ShortLinkRemoteService {
     default Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
         Map<String, Object> requestMap = new HashMap<>(3);
         requestMap.put("gid", requestParam.getGid());
+        requestMap.put("orderTag", requestParam.getOrderTag());
         requestMap.put("current", requestParam.getCurrent());
         requestMap.put("size", requestParam.getSize());
         String resultPage = HttpUtil.get(URL_PREFIX + "page", requestMap);

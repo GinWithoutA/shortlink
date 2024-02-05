@@ -1,9 +1,11 @@
 package org.ginwithouta.shortlink.project.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkDO;
+import org.ginwithouta.shortlink.project.dto.req.ShortLinkPageReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.StatsIncrementMapperDTO;
 
 /**
@@ -22,4 +24,9 @@ public interface ShortLinkMapper extends BaseMapper<ShortLinkDO> {
             "   total_uip = total_uip + #{requestParam.totalUip} " +
             "WHERE gid = #{requestParam.gid} AND full_short_url = #{requestParam.fullShortUrl} ")
     void incrementStats(@Param("requestParam") StatsIncrementMapperDTO requestParam);
+
+    /**
+     * 分页统计短链接
+     */
+    IPage<ShortLinkDO> pageLink(ShortLinkPageReqDTO requestParam);
 }

@@ -46,7 +46,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
         /*
          * 短链接监控之基础数据（PV，UV，UIP）
          */
-        List<ShortLinkStatsDailyRespDTO> dailyStatistics = new ArrayList<>();
+        List<ShortLinkStatsDailyRespDTO> dailyStats = new ArrayList<>();
         // 通过 requestParam 中传入的 startDate 以及 endDate 生成中间每一天的日期，例如 [2023/11/1, 2023/11/2, 2023/11/3, ...]
         List<String> eachDates = DateUtil.rangeToList(DateUtil.parse(requestParam.getStartDate()), DateUtil.parse(requestParam.getEndDate()), DateField.DAY_OF_MONTH)
                 .stream()
@@ -63,7 +63,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                         .uip(stats.getUip())
                         .uv(stats.getUv())
                         .build();
-                dailyStatistics.add(dailyRespDTO);
+                dailyStats.add(dailyRespDTO);
             }, () -> {
                 ShortLinkStatsDailyRespDTO dailyRespDTO = ShortLinkStatsDailyRespDTO.builder()
                         .date(eachDay)
@@ -71,12 +71,12 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                         .uip(0)
                         .uv(0)
                         .build();
-                dailyStatistics.add(dailyRespDTO);
+                dailyStats.add(dailyRespDTO);
             }));
         /*
          * 短链接监控之地区（仅国内）
          */
-        List<ShortLinkStatsLocaleCNRespDTO> localeCNRespDTOS = new ArrayList<>();
+        List<ShortLinkStatsLocaleCNRespDTO> localeCNStats = new ArrayList<>();
         List<ShortLinkLocaleStatisticsDO> listLocaleByShortLink = statsLocaleMapper.listLocaleByShortLink(requestParam);
         int localeCNSum = listLocaleByShortLink.stream()
                 .mapToInt(ShortLinkLocaleStatisticsDO::getCnt)
@@ -89,7 +89,7 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .locale(each.getProvince())
                     .ratio(actualRatio)
                     .build();
-            localeCNRespDTOS.add(localeCNRespDTO);
+            localeCNStats.add(localeCNRespDTO);
         });
         /*
          * 短链接监控之 24 小时访问分布情况
@@ -237,5 +237,17 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
                     .build();
             networkStats.add(networkRespDTO);
         });
+        return ShortLinkStatsRespDTO.builder()
+                .daily(dailyStats)
+                .localeCnStats(localeCNStats)
+                .hourStats(hoursStats)
+                .topIpStats(topIpStats)
+                .weekdayStats(weekdayStats)
+                .browserStats(browserStats)
+                .osStats(osStats)
+                .uvTypeStats(uvTypeStats)
+                .deviceStats(deviceStats)
+                .networkStats(networkStats)
+                .build();
     }
 }

@@ -92,6 +92,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Value("${short-link.statistics.locale.amap-key}")
     private String statisticsLocaleAMapKey;
 
+    @Value("${short-link.domain.default}")
+    private String defaultDomain;
+
     private static final int MAX_GENERATE_TIMES = 100;
 
     @Override
@@ -105,6 +108,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         shortLinkDO.setFullShortUrl(fullShortLinkUrl);
         shortLinkDO.setShortUri(shortLinkSuffix);
         shortLinkDO.setDescription(requestParam.getDescribe());
+        shortLinkDO.setDomain(defaultDomain);
         // TODO 恶意请求有风险，后续要改成异步的
         shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
         // 创建短链接的时候同时插入路由记录
@@ -152,6 +156,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .append(shortLinkSuffix)
                     .toString();
             ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
+            shortLinkDO.setDomain(defaultDomain);
             shortLinkDO.setOriginUrl(requestParam.getOriginUrls().get(i));
             shortLinkDO.setDescription(requestParam.getDescribes().get(i));
             shortLinkDO.setFullShortUrl(fullShortLinkUrl);
@@ -291,7 +296,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     public void redirectUrl(String shortUri, ServletRequest request, ServletResponse response) {
         String serverName = /* DOMAIN_PREFIX + */ request.getServerName();
-        String fullShortUrl = StrBuilder.create(serverName).append("/").append(shortUri).toString();
+        String serverPort = Optional.of(request.getServerPort())
+                .filter(each -> !Objects.equals(each, 80))
+                .map(String::valueOf)
+                .map(each -> ":" + each)
+                .orElse("");
+        String fullShortUrl = StrBuilder.create(serverName).append(serverPort).append("/").append(shortUri).toString();
         // 先查缓存，如果有就直接返回
         String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originLink)) {

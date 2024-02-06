@@ -36,6 +36,8 @@ mybatis-plus:
   mapper-locations: classpath:mapper/*.xml
 
 short-link:
+  domain:
+    default: tinybridge.intbeast.top:8001
   statistics:
     locale:
       amap-key: a336bb745b866b677786215eb3d947c6

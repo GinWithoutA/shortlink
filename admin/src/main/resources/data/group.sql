@@ -1,3 +1,6 @@
+create schema link collate utf8mb4_general_ci;
+use link;
+
 create table t_group_0
 (
     id          bigint auto_increment comment 'ID'

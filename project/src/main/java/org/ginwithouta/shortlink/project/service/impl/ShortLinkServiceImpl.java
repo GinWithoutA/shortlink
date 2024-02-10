@@ -272,6 +272,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         if (selectShortLinkDO == null) {
             throw new ClientException(SHORT_LINK_NOT_EXIST);
         }
+        ShortLinkDO shortLinkDO = ShortLinkDO.builder()
+                .gid(requestParam.getGid())
+                .originUrl(requestParam.getOriginUrl())
+                .description(requestParam.getDescribe())
+                .validDateType(requestParam.getValidDateType())
+                .validDate(requestParam.getValidDate())
+                .build();
         if (Objects.equals(selectShortLinkDO.getGid(), requestParam.getGid())) {
             // 没有发生换组行为，直接更新
             LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
@@ -279,16 +286,22 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getGid, requestParam.getGid())
                     .eq(ShortLinkDO::getEnable, 1)
                     .set(Objects.equals(requestParam.getValidDateType(), PERMANENT.getType()), ShortLinkDO::getValidDate, null);
-            ShortLinkDO shortLinkDO = ShortLinkDO.builder()
-                    .gid(requestParam.getGid())
-                    .originUrl(requestParam.getOriginUrl())
-                    .description(requestParam.getDescribe())
-                    .validDateType(requestParam.getValidDateType())
-                    .validDate(requestParam.getValidDate())
-                    .build();
             baseMapper.update(shortLinkDO, updateWrapper);
         } else {
             // 发生了换组行为，需要先删再新增
+            LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                    .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                    .eq(ShortLinkDO::getGid, selectShortLinkDO.getGid())
+                    .eq(ShortLinkDO::getEnable, 1);
+            baseMapper.delete(updateWrapper);
+            baseMapper.insert(shortLinkDO);
+        }
+        // 如果发生了有效期的变更，需要删除原有的 redis 记录，当再次访问的时候，直接让他去数据库加载获取最新的日期就可以了
+        if (!Objects.equals(selectShortLinkDO.getValidDateType(), requestParam.getValidDateType()) || !Objects.equals(selectShortLinkDO.getValidDate(), requestParam.getValidDate())) {
+            stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+            if (requestParam.getValidDate() == null || requestParam.getValidDate().isBefore(LocalDateTime.now())) {
+                stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+            }
         }
     }
 

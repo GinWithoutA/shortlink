@@ -1,9 +1,11 @@
 package org.ginwithouta.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.admin.biz.user.UserContext;
 import org.ginwithouta.shortlink.admin.common.convention.exception.ClientException;
@@ -18,6 +20,9 @@ import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +30,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.LOCK_GROUP_CREATE_KEY;
+import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCodeEnums.GROUP_CREATE_EXCEED_MAX;
 import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCodeEnums.GROUP_DELETE_FAIL;
 
 /**
@@ -35,7 +42,12 @@ import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCo
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+    private final RedissonClient redissonClient;
+
+    @Value("${short-link.group.max-num}")
+    private Integer groupMaxNum;
 
     /**
      * TODO 后续重构为 Spring Cloud
@@ -50,17 +62,28 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
     @Override
     public void saveGroup(String username, String groupName) {
-        String gid = RandomGenerator.generateRandomCode();
-        while (hasGid(username, gid)) {
-            gid = RandomGenerator.generateRandomCode();
+        RLock lock = redissonClient.getLock(String.format(LOCK_GROUP_CREATE_KEY, username));
+        lock.lock();
+        try {
+            LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getUsername, username);
+            List<GroupDO> groupDOS = baseMapper.selectList(queryWrapper);
+            if (CollUtil.isNotEmpty(groupDOS) && groupDOS.size() == groupMaxNum) {
+                throw new ClientException(GROUP_CREATE_EXCEED_MAX);
+            }
+            String gid = RandomGenerator.generateRandomCode();
+            while (hasGid(username, gid)) {
+                gid = RandomGenerator.generateRandomCode();
+            }
+            GroupDO groupDO = GroupDO.builder()
+                    .name(groupName)
+                    .gid(gid)
+                    .username(username)
+                    .sortOrder(0)
+                    .build();
+            baseMapper.insert(groupDO);
+        } finally {
+            lock.unlock();
         }
-        GroupDO groupDO = GroupDO.builder()
-                .name(groupName)
-                .gid(gid)
-                .username(username)
-                .sortOrder(0)
-                .build();
-        baseMapper.insert(groupDO);
     }
 
     @Override

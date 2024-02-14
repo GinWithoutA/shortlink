@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -23,6 +24,11 @@ public class MessageQueueIdempotentHandler {
     public boolean isMessageProcessed(String messageId) {
         String key = IDEMPOTENT_KEY_PREFIX + messageId;
         return Boolean.TRUE.equals(stringRedisTemplate.opsForValue().setIfAbsent(key, "0", 2, TimeUnit.MINUTES));
+    }
+
+    public boolean isAccomplish(String messageId) {
+        String key = IDEMPOTENT_KEY_PREFIX + messageId;
+        return Objects.equals(stringRedisTemplate.opsForValue().get(key), "1");
     }
 
     /**

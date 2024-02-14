@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.project.dto.req;
+package org.ginwithouta.shortlink.project.dto.biz;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +14,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UvTypeGroupMapperDTO {
+public class UvTypeMapperDTO {
+    /**
+     * 完整短链接
+     */
+    private String fullShortUrl;
+
     /**
      * 分组标识
      */

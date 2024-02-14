@@ -29,6 +29,11 @@ public class ShortLinkUpdateReqDTO {
     private String gid;
 
     /**
+     * 原始 gid
+     */
+    private String originGid;
+
+    /**
      * 短链接启用标识 0 未启用 1 已启用
      */
     private Integer enable;

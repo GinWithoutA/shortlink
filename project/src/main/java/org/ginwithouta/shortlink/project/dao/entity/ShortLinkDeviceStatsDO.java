@@ -8,16 +8,16 @@ import java.util.Date;
 
 /**
  * @author Ginwithouta
- * Generate at 2023/11/29
- * 短链接监控地区统计实体
+ * Generate at 2023/12/1
+ * 短链接访问设备统计实体
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_locale_statistics")
+@TableName("t_device_statistics")
 @EqualsAndHashCode(callSuper = true)
-public class ShortLinkLocaleStatisticsDO extends BaseDO {
+public class ShortLinkDeviceStatsDO extends BaseDO {
     /**
      * 完整短链接
      */
@@ -39,22 +39,7 @@ public class ShortLinkLocaleStatisticsDO extends BaseDO {
     private Integer cnt;
 
     /**
-     * 省份名称
+     * 访问的设备
      */
-    private String province;
-
-    /**
-     * 地级市名称
-     */
-    private String city;
-
-    /**
-     * 城市编码
-     */
-    private String adcode;
-
-    /**
-     * 国家标识
-     */
-    private String country;
+    private String device;
 }

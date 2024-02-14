@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatisticsDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkLocaleStatsDO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
@@ -15,7 +15,7 @@ import java.util.List;
  * Generate at 2023/11/29
  * 短链接地区统计访问持久层
  */
-public interface ShortLinkStatsLocaleMapper extends BaseMapper<ShortLinkLocaleStatisticsDO> {
+public interface ShortLinkLocaleStatsMapper extends BaseMapper<ShortLinkLocaleStatsDO> {
 
     /**
      * 新增h或更新短链接地区统计
@@ -29,7 +29,7 @@ public interface ShortLinkStatsLocaleMapper extends BaseMapper<ShortLinkLocaleSt
             "   NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{localeStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkLocaleStatistics(@Param("localeStatisticsDO") ShortLinkLocaleStatisticsDO localeStatisticsDO);
+    void shortLinkStatsLocale(@Param("localeStatisticsDO") ShortLinkLocaleStatsDO localeStatisticsDO);
 
     /**
      * 根据短链接获取指定日期范围的地区监控记录
@@ -41,7 +41,7 @@ public interface ShortLinkStatsLocaleMapper extends BaseMapper<ShortLinkLocaleSt
             "   AND gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY full_short_url, gid, province;")
-    List<ShortLinkLocaleStatisticsDO> listLocaleByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
+    List<ShortLinkLocaleStatsDO> listLocaleByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
      * 根据短链接分组获取指定日期范围的地区监控记录
@@ -52,5 +52,5 @@ public interface ShortLinkStatsLocaleMapper extends BaseMapper<ShortLinkLocaleSt
             "WHERE gid = #{requestParam.gid} " +
             "   AND date BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} " +
             "GROUP BY gid, province;")
-    List<ShortLinkLocaleStatisticsDO> listLocaleByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
+    List<ShortLinkLocaleStatsDO> listLocaleByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

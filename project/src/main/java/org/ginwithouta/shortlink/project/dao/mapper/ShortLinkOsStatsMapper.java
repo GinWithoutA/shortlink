@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkOsStatisticsDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkOsStatsDO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Generate at 2023/11/29
  * 短链接操作系统统计访问持久层
  */
-public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatisticsDO> {
+public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatsDO> {
 
     /**
      * 记录操作系统访问监控数据
@@ -29,7 +29,7 @@ public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatistics
             "   #{osStatisticsDO.os}, NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{osStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkOsStatistics(@Param("osStatisticsDO") ShortLinkOsStatisticsDO osStatisticsDO);
+    void shortLinkOsStatistics(@Param("osStatisticsDO") ShortLinkOsStatsDO osStatisticsDO);
 
     /**
      * 根据短链接获取操作系统监控记录

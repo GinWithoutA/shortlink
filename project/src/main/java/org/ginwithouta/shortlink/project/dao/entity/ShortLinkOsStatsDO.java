@@ -17,7 +17,7 @@ import java.util.Date;
 @AllArgsConstructor
 @TableName("t_os_statistics")
 @EqualsAndHashCode(callSuper = true)
-public class ShortLinkOsStatisticsDO extends BaseDO {
+public class ShortLinkOsStatsDO extends BaseDO {
     /**
      * 完整短链接
      */

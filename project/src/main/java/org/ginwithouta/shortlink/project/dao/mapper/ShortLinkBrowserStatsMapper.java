@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsBrowserDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkBrowserStatsDO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkGroupStatsReqDTO;
 import org.ginwithouta.shortlink.project.dto.req.ShortLinkStatsReqDTO;
 
@@ -16,7 +16,7 @@ import java.util.List;
  * Generate at 2023/11/29
  * 短链接浏览器统计访问持久层
  */
-public interface ShortLinkStatsBrowserMapper extends BaseMapper<ShortLinkStatsBrowserDO> {
+public interface ShortLinkBrowserStatsMapper extends BaseMapper<ShortLinkBrowserStatsDO> {
 
     /**
      * 短链接监控之获取短链接的浏览器访问记录
@@ -48,5 +48,5 @@ public interface ShortLinkStatsBrowserMapper extends BaseMapper<ShortLinkStatsBr
             "   #{browserStatisticsDO.browser}, NOW(), NOW(), 0) " +
             "ON DUPLICATE KEY UPDATE" +
             "  cnt = cnt + #{browserStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkBrowserStatistics(@Param("browserStatisticsDO") ShortLinkStatsBrowserDO browserStatisticsDO);
+    void shortLinkBrowserStatistics(@Param("browserStatisticsDO") ShortLinkBrowserStatsDO browserStatisticsDO);
 }

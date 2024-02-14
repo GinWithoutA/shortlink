@@ -9,15 +9,15 @@ import java.util.Date;
 /**
  * @author Ginwithouta
  * Generate at 2023/12/1
- * 短链接访问网络统计实体
+ * 短链接操作系统统计实体
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_network_statistics")
+@TableName("t_browser_statistics")
 @EqualsAndHashCode(callSuper = true)
-public class ShortLinkNetworkStatisticsDO extends BaseDO {
+public class ShortLinkBrowserStatsDO extends BaseDO {
     /**
      * 完整短链接
      */
@@ -39,7 +39,7 @@ public class ShortLinkNetworkStatisticsDO extends BaseDO {
     private Integer cnt;
 
     /**
-     * 访问网络
+     * 浏览器名称
      */
-    private String network;
+    private String browser;
 }

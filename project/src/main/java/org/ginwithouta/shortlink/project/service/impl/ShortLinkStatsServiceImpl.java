@@ -12,9 +12,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
+import org.ginwithouta.shortlink.project.dto.biz.UvTypeGroupMapperDTO;
+import org.ginwithouta.shortlink.project.dto.biz.UvTypeMapperDTO;
 import org.ginwithouta.shortlink.project.dto.req.*;
 import org.ginwithouta.shortlink.project.dto.resp.*;
-import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
+import org.ginwithouta.shortlink.project.service.ShortLinkStatsService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,11 +30,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMapper, ShortLinkStatsDO> implements ShortLinkStatisticsService {
+public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper, ShortLinkStatsDO> implements ShortLinkStatsService {
 
-    private final ShortLinkStatsLocaleMapper statsLocaleMapper;
+    private final ShortLinkLocaleStatsMapper statsLocaleMapper;
     private final ShortLinkAccessLogsMapper accessLogsMapper;
-    private final ShortLinkStatsBrowserMapper statsBrowserMapper;
+    private final ShortLinkBrowserStatsMapper statsBrowserMapper;
     private final ShortLinkOsStatsMapper statsOsMapper;
     private final ShortLinkDeviceStatsMapper statsDeviceMapper;
     private final ShortLinkNetworkStatsMapper statsNetworkMapper;
@@ -82,9 +84,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接监控之地区（仅国内）
          */
         List<ShortLinkStatsLocaleCNRespDTO> localeCNStats = new ArrayList<>();
-        List<ShortLinkLocaleStatisticsDO> listLocaleByShortLink = statsLocaleMapper.listLocaleByShortLink(requestParam);
+        List<ShortLinkLocaleStatsDO> listLocaleByShortLink = statsLocaleMapper.listLocaleByShortLink(requestParam);
         int localeCNSum = listLocaleByShortLink.stream()
-                .mapToInt(ShortLinkLocaleStatisticsDO::getCnt)
+                .mapToInt(ShortLinkLocaleStatsDO::getCnt)
                 .sum();
         listLocaleByShortLink.forEach(each -> {
             double ratio = (double) each.getCnt() / localeCNSum;
@@ -210,9 +212,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接监控之访问设备
          */
         List<ShortLinkStatsDeviceRespDTO> deviceStats = new ArrayList<>();
-        List<ShortLinkDeviceStatisticsDO> listDeviceStatsByShortLink = statsDeviceMapper.listDeviceStatsByShortLink(requestParam);
+        List<ShortLinkDeviceStatsDO> listDeviceStatsByShortLink = statsDeviceMapper.listDeviceStatsByShortLink(requestParam);
         int deviceSum = listDeviceStatsByShortLink.stream()
-                .mapToInt(ShortLinkDeviceStatisticsDO::getCnt)
+                .mapToInt(ShortLinkDeviceStatsDO::getCnt)
                 .sum();
         listDeviceStatsByShortLink.forEach(each -> {
             double ratio = (double) each.getCnt() / deviceSum;
@@ -228,9 +230,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接监控之网络
          */
         List<ShortLinkStatsNetworkRespDTO> networkStats = new ArrayList<>();
-        List<ShortLinkNetworkStatisticsDO> listNetworkStatsByShortLink = statsNetworkMapper.listNetworkStatsByShortLink(requestParam);
+        List<ShortLinkNetworkStatsDO> listNetworkStatsByShortLink = statsNetworkMapper.listNetworkStatsByShortLink(requestParam);
         int networkSum = listNetworkStatsByShortLink.stream()
-                .mapToInt(ShortLinkNetworkStatisticsDO::getCnt)
+                .mapToInt(ShortLinkNetworkStatsDO::getCnt)
                 .sum();
         listNetworkStatsByShortLink.forEach(each -> {
             double ratio = (double) each.getCnt() / networkSum;
@@ -304,9 +306,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接分组监控之地区（仅国内）
          */
         List<ShortLinkStatsLocaleCNRespDTO> localeCNStats = new ArrayList<>();
-        List<ShortLinkLocaleStatisticsDO> listLocaleByGroup = statsLocaleMapper.listLocaleByGroup(requestParam);
+        List<ShortLinkLocaleStatsDO> listLocaleByGroup = statsLocaleMapper.listLocaleByGroup(requestParam);
         int localeCNSum = listLocaleByGroup.stream()
-                .mapToInt(ShortLinkLocaleStatisticsDO::getCnt)
+                .mapToInt(ShortLinkLocaleStatsDO::getCnt)
                 .sum();
         listLocaleByGroup.forEach(each -> {
             double ratio = (double) each.getCnt() / localeCNSum;
@@ -432,9 +434,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接分组监控之访问设备
          */
         List<ShortLinkStatsDeviceRespDTO> deviceStats = new ArrayList<>();
-        List<ShortLinkDeviceStatisticsDO> listDeviceStatsByGroup = statsDeviceMapper.listDeviceStatsByGroup(requestParam);
+        List<ShortLinkDeviceStatsDO> listDeviceStatsByGroup = statsDeviceMapper.listDeviceStatsByGroup(requestParam);
         int deviceSum = listDeviceStatsByGroup.stream()
-                .mapToInt(ShortLinkDeviceStatisticsDO::getCnt)
+                .mapToInt(ShortLinkDeviceStatsDO::getCnt)
                 .sum();
         listDeviceStatsByGroup.forEach(each -> {
             double ratio = (double) each.getCnt() / deviceSum;
@@ -450,9 +452,9 @@ public class ShortLinkStatisticsServiceImpl extends ServiceImpl<ShortLinkStatsMa
          * 短链接分组监控之网络
          */
         List<ShortLinkStatsNetworkRespDTO> networkStats = new ArrayList<>();
-        List<ShortLinkNetworkStatisticsDO> listNetworkStatsByGroup = statsNetworkMapper.listNetworkStatsByGroup(requestParam);
+        List<ShortLinkNetworkStatsDO> listNetworkStatsByGroup = statsNetworkMapper.listNetworkStatsByGroup(requestParam);
         int networkSum = listNetworkStatsByGroup.stream()
-                .mapToInt(ShortLinkNetworkStatisticsDO::getCnt)
+                .mapToInt(ShortLinkNetworkStatsDO::getCnt)
                 .sum();
         listNetworkStatsByGroup.forEach(each -> {
             double ratio = (double) each.getCnt() / networkSum;

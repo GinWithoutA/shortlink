@@ -12,7 +12,7 @@ import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsAccessRecor
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupStatsRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkStatsRespDTO;
-import org.ginwithouta.shortlink.project.service.ShortLinkStatisticsService;
+import org.ginwithouta.shortlink.project.service.ShortLinkStatsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(value = "/api/short/link/project/v1/stats/")
-public class ShortLinkStatisticsController {
+public class ShortLinkStatsController {
 
-    private final ShortLinkStatisticsService shortLinkStatisticsService;
+    private final ShortLinkStatsService shortLinkStatisticsService;
 
     /**
      * 单个短链接详细监控数据访问

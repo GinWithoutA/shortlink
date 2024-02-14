@@ -3,14 +3,14 @@ package org.ginwithouta.shortlink.project.dao.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
-import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsTodayDO;
+import org.ginwithouta.shortlink.project.dao.entity.ShortLinkTodayStatsDO;
 
 /**
  * @author Ginwithouta
  * Generate at 2024/2/5
  * 短链接当日访问 Mapper
  */
-public interface ShortLinkStatsTodayMapper extends BaseMapper<ShortLinkStatsTodayDO> {
+public interface ShortLinkTodayStatsMapper extends BaseMapper<ShortLinkTodayStatsDO> {
 
     /**
      * 记录短链接当日访问数据
@@ -24,5 +24,5 @@ public interface ShortLinkStatsTodayMapper extends BaseMapper<ShortLinkStatsToda
             "  today_uv = today_uv + #{linkStatsTodayDO.todayUv}, " +
             "  today_pv = today_pv + #{linkStatsTodayDO.todayPv},  " +
             "  today_uip = today_uip + #{linkStatsTodayDO.todayUip}, update_time = NOW();")
-    void shortLinkTodayStats(@Param("linkStatsTodayDO") ShortLinkStatsTodayDO linkStatsTodayDO);
+    void shortLinkTodayStats(@Param("linkStatsTodayDO") ShortLinkTodayStatsDO linkStatsTodayDO);
 }

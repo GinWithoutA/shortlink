@@ -8,20 +8,16 @@ import java.util.Date;
 
 /**
  * @author Ginwithouta
- * Generate at 2023/12/1
- * 短链接操作系统统计实体
+ * Generate at 2024/2/5
+ * 短链接访问每日统计 DO
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_browser_statistics")
-@EqualsAndHashCode(callSuper = true)
-public class ShortLinkStatsBrowserDO extends BaseDO {
-    /**
-     * 完整短链接
-     */
-    private String fullShortUrl;
+@TableName("t_link_stats_today")
+public class ShortLinkTodayStatsDO extends BaseDO {
 
     /**
      * 分组标识
@@ -29,17 +25,27 @@ public class ShortLinkStatsBrowserDO extends BaseDO {
     private String gid;
 
     /**
+     * 短链接
+     */
+    private String fullShortUrl;
+
+    /**
      * 日期
      */
     private Date date;
 
     /**
-     * 访问量
+     * 今日PV
      */
-    private Integer cnt;
+    private Integer todayPv;
 
     /**
-     * 浏览器名称
+     * 今日UV
      */
-    private String browser;
+    private Integer todayUv;
+
+    /**
+     * 今日IP数
+     */
+    private Integer todayUip;
 }

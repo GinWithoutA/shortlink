@@ -37,5 +37,5 @@ public class BaseDO {
      * 删除标识：0：未删除：1：已删除
      */
     @TableLogic
-    private String delFlag;
+    private Integer delFlag;
 }

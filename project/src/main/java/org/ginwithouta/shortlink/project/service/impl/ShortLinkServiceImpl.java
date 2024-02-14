@@ -108,7 +108,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     public ShortLinkCreateRespDTO createShorLink(ShortLinkCreateReqDTO requestParam) {
         verificationWShiteList(requestParam.getOriginUrl());
-        String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), requestParam.getDomain());
+        String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), defaultDomain);
         String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                 .append("/")
                 .append(shortLinkSuffix)
@@ -159,7 +159,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         List<ShortLinkDO> shortLinkSaveBatch = new ArrayList<>();
         List<ShortLinkGoToDO> shortLinkGoToSaveBatch = new ArrayList<>();
         for (int i = 0; i < requestParam.getOriginUrls().size(); ++i) {
-            String shortLinkSuffix = generateSuffix(requestParam.getOriginUrls().get(i), requestParam.getDomain());
+            String shortLinkSuffix = generateSuffix(requestParam.getOriginUrls().get(i), defaultDomain);
             String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                     .append("/")
                     .append(shortLinkSuffix)

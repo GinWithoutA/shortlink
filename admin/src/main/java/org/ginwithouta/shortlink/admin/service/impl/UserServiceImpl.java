@@ -1,6 +1,7 @@
 package org.ginwithouta.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -28,6 +29,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
@@ -112,14 +114,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(USER_LOGIN_ERROR);
         }
         String key = CACHE_LOGIN_PREFIX + requestParam.getUsername();
-        Boolean isAlreadyLogin = stringRedisTemplate.hasKey(key);
-        if (isAlreadyLogin != null && isAlreadyLogin) {
-            throw new ClientException(USER_ALREADY_LOGIN);
+        Map<Object, Object> isAlreadyLoginMap = stringRedisTemplate.opsForHash().entries(key);
+        if (CollUtil.isNotEmpty(isAlreadyLoginMap)) {
+            String token = isAlreadyLoginMap.keySet().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElseThrow(() -> new ClientException(USER_LOGIN_ERROR));
+            return new UserLoginRespDTO(token);
         }
         String uuid = UUID.randomUUID().toString();
         stringRedisTemplate.opsForHash().put(key, uuid, JSON.toJSONString(userDO));
         // TODO: 网关还没加进来，为了方便直接将Token设置成30天
-        stringRedisTemplate.expire(key, 30L, TimeUnit.DAYS);
+        stringRedisTemplate.expire(key, 30L, TimeUnit.MINUTES);
         return new UserLoginRespDTO(uuid);
     }
 

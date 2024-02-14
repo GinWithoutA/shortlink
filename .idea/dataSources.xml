@@ -26,7 +26,7 @@
       </jdbc-additional-properties>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="Aliyun" uuid="0dbff87e-6e03-4b5d-9076-ffa8c4249f06">
+    <data-source source="LOCAL" name="aliyun-mysql" uuid="0dbff87e-6e03-4b5d-9076-ffa8c4249f06">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>

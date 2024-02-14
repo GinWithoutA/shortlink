@@ -5,6 +5,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkAccessLogsDO;
 import org.ginwithouta.shortlink.project.dao.entity.ShortLinkStatsDO;
+import org.ginwithouta.shortlink.project.dto.biz.UvTypeGroupMapperDTO;
+import org.ginwithouta.shortlink.project.dto.biz.UvTypeMapperDTO;
 import org.ginwithouta.shortlink.project.dto.req.*;
 
 import java.util.HashMap;
@@ -85,7 +87,7 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "           </foreach> " +
             "   GROUP BY user; " +
             "</script> ")
-    List<Map<String, Object>> selectGroupUvTypeByUsers(@Param("requestParam") UvTypeGroupMapperDTO bean,  @Param("userAccessLogsList") List<String> userAccessLogsList);
+    List<Map<String, Object>> selectGroupUvTypeByUsers(@Param("requestParam") UvTypeGroupMapperDTO bean, @Param("userAccessLogsList") List<String> userAccessLogsList);
 
     /**
      * 查询用户列表中哪些是老用户，哪些是新用户

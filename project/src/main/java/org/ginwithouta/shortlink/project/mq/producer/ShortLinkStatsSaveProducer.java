@@ -17,7 +17,7 @@ public class ShortLinkStatsSaveProducer {
     private final StringRedisTemplate stringRedisTemplate;
 
     /**
-     * 发送延迟消费短链接统计
+     * 发送消费短链接统计
      */
     public void send(Map<String, String> producerMap) {
         stringRedisTemplate.opsForStream().add(SHORT_LINK_STATS_STREAM_TOPIC_KEY, producerMap);

@@ -1,8 +1,10 @@
 package org.ginwithouta.shortlink.project.toolkit;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
@@ -146,5 +148,20 @@ public class LinkUtil {
      */
     public static String getNetwork(String actualIp) {
         return actualIp.startsWith("192.168.") || actualIp.startsWith("10.") ? "WIFI" : "Mobile Network";
+    }
+
+    public static String extractDomain(String url) {
+        String domain = null;
+        try {
+            URI uri = new URI(url);
+            String host = uri.getHost();
+            if (StrUtil.isNotBlank(host)) {
+                domain = host;
+                if (domain.startsWith("www.")) {
+                    domain = host.substring(4);
+                }
+            }
+        } catch (Exception ignored) {}
+        return domain;
     }
 }

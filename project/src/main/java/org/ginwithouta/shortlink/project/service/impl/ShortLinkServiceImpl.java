@@ -23,6 +23,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.common.convention.exception.ClientException;
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
+import org.ginwithouta.shortlink.project.config.GotoDomainWhiteListConfiguration;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
@@ -94,6 +95,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsTodayService shortLinkTodayStatsService;
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
+    private final GotoDomainWhiteListConfiguration gotoDomain;
 
     @Value("${short-link.statistics.locale.amap-key}")
     private String statisticsLocaleAMapKey;
@@ -105,6 +107,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public ShortLinkCreateRespDTO createShorLink(ShortLinkCreateReqDTO requestParam) {
+        verificationWShiteList(requestParam.getOriginUrl());
         String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), requestParam.getDomain());
         String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                 .append("/")
@@ -270,6 +273,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        verificationWShiteList(requestParam.getOriginUrl());
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                 .eq(ShortLinkDO::getGid, requestParam.getOriginGid())
                 .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
@@ -595,5 +599,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             return document.title();
         }
         return "Error while fetching title.";
+    }
+
+    private void verificationWShiteList(String originUrl) {
+        Boolean enable = gotoDomain.getEnable();
+        if (enable == null || !enable) {
+            return;
+        }
+        String domain = LinkUtil.extractDomain(originUrl);
+        if (StrUtil.isNotBlank(domain)) {
+            throw new ClientException(SHORT_LINK_BLACK_LIST);
+        }
+        List<String> details = gotoDomain.getDetails();
+        if (!details.contains(domain)) {
+            // TODO 后续返回具体可以跳转的链接
+            throw new ClientException(SHORT_LINK_BLACK_LIST);
+        }
     }
 }

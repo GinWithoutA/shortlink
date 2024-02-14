@@ -41,3 +41,13 @@ short-link:
   statistics:
     locale:
       amap-key: a336bb745b866b677786215eb3d947c6
+  goto-domain:
+    # 白名单，目前关闭
+    white-list:
+      enable: false
+      names: '淘宝,天猫,知乎,京东,CSDN'
+      details:
+        - taobao.com
+        - tmall.com
+        - zhihu.com
+        - csdn.net

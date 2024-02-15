@@ -19,7 +19,8 @@ public enum UserErrorCodeEnums implements IErrorCode {
     USER_ALREADY_LOGIN("B000205", "用户已登录"),
     USER_NOT_LOGIN("B000206", "用户未登录"),
     USER_INFO_ERROR("A000210", "用户信息存在异常"),
-    USER_INFO_GROUP_EMPTY("A000211", "当前用户没有分组信息");
+    USER_INFO_GROUP_EMPTY("A000211", "当前用户没有分组信息"),
+    USER_FLOW_LIMIT_ERROR("B000221", "当前用户已被风控");
 
     private final String code;
 

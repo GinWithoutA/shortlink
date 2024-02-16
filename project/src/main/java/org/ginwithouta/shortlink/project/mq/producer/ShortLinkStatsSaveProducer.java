@@ -1,11 +1,10 @@
 package org.ginwithouta.shortlink.project.mq.producer;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 import java.util.Map;
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.SHORT_LINK_STATS_STREAM_TOPIC_KEY;
-
 /**
  * @author Ginwithouta
  * Generate at 2024/2/14
@@ -16,10 +15,13 @@ import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant
 public class ShortLinkStatsSaveProducer {
     private final StringRedisTemplate stringRedisTemplate;
 
+    @Value("${spring.data.redis.channel-topic.short-link-stats}")
+    private String topic;
+
     /**
      * 发送消费短链接统计
      */
     public void send(Map<String, String> producerMap) {
-        stringRedisTemplate.opsForStream().add(SHORT_LINK_STATS_STREAM_TOPIC_KEY, producerMap);
+        stringRedisTemplate.opsForStream().add(topic, producerMap);
     }
 }

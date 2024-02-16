@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.REDIS_USER_ALREADY_LOGIN_IN_KEY;
 import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.USER_TOKEN_CHECK_FAIL;
 
 /**
@@ -27,7 +28,6 @@ import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.US
 public class UserTransmitFilter implements Filter {
 
     private final StringRedisTemplate stringRedisTemplate;
-    private static final String CACHE_TOKEN_PREFIX = "login-";
 
     // TODO: 后续还要进行更新
     private static final List<String> IGNORE_URIS = Lists.newArrayList(
@@ -54,7 +54,7 @@ public class UserTransmitFilter implements Filter {
                 }
                 Object userInfoJsonStr;
                 try {
-                    userInfoJsonStr = stringRedisTemplate.opsForHash().get(CACHE_TOKEN_PREFIX + username, token);
+                    userInfoJsonStr = stringRedisTemplate.opsForHash().get(StrUtil.format(REDIS_USER_ALREADY_LOGIN_IN_KEY, username), token);
                     if (userInfoJsonStr == null) {
                         throw new ClientException(USER_TOKEN_CHECK_FAIL);
                     }

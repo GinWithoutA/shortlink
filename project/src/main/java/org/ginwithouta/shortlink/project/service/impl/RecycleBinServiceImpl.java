@@ -18,8 +18,7 @@ import org.ginwithouta.shortlink.project.service.RecycleBinService;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY;
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.GOTO_SHORT_LINK_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 
 /**
  * @author Ginwithouta
@@ -43,7 +42,7 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
                 .build();
         baseMapper.update(updatedDO, updateWrapper);
         // 当前短链接被移动到回收站之后，需要禁用当前短链接
-        stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+        stringRedisTemplate.delete(String.format(REDIS_GOTO_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
     }
 
     @Override
@@ -67,7 +66,7 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
                 .build();
         baseMapper.update(updatedDO, updateWrapper);
         // 当前短链接被移动到回收站之后，需要禁用当前短链接
-        stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
+        stringRedisTemplate.delete(String.format(REDIS_GOTO_SHORT_LINK_IS_NULL_KEY, requestParam.getFullShortUrl()));
         /*
          * 这里可以不用做缓存的预热，一个从回收站中移除的短链接一边来说不会有太大的访问量，可以直接使用缓存击穿的方式来进行处理
          */

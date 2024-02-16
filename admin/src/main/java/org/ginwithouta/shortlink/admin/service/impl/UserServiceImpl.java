@@ -3,6 +3,7 @@ package org.ginwithouta.shortlink.admin.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.UUID;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -32,7 +33,7 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.LOCK_USER_REGISTER_KEY;
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.*;
 import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.*;
 
 /**
@@ -50,7 +51,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RedissonClient redissonClient;
     private final StringRedisTemplate stringRedisTemplate;
     private final GroupService groupService;
-    private static final String CACHE_LOGIN_PREFIX = "login-";
 
     @Override
     public UserRespDTO getUserByUsername(String username) {
@@ -76,7 +76,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(USER_NAME_EXIST);
         }
         // 防止缓存穿透，多个恶意线程同时请求同一个不存在的用户名，多个线程一起查数据库导致数据库崩溃，因此加锁
-        RLock lock = redissonClient.getLock(LOCK_USER_REGISTER_KEY + requestParam.getUsername());
+        RLock lock = redissonClient.getLock(StrUtil.format(REDIS_LOCK_USER_REGISTER_KEY, requestParam.getUsername()));
         try {
             if (lock.tryLock()) {
                 try {
@@ -113,7 +113,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (userDO == null) {
             throw new ClientException(USER_LOGIN_ERROR);
         }
-        String key = CACHE_LOGIN_PREFIX + requestParam.getUsername();
+        String key = StrUtil.format(REDIS_USER_ALREADY_LOGIN_IN_KEY, requestParam.getUsername());
         Map<Object, Object> isAlreadyLoginMap = stringRedisTemplate.opsForHash().entries(key);
         if (CollUtil.isNotEmpty(isAlreadyLoginMap)) {
             String token = isAlreadyLoginMap.keySet().stream()
@@ -131,7 +131,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Boolean checkLogin(String username, String token) {
-        String key = CACHE_LOGIN_PREFIX + username;
+        String key = StrUtil.format(REDIS_USER_ALREADY_LOGIN_IN_KEY, username);
         return stringRedisTemplate.opsForHash().get(key, token) != null;
     }
 
@@ -140,7 +140,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         if (!checkLogin(username, token)) {
             throw new ClientException(USER_NOT_LOGIN);
         }
-        String key = CACHE_LOGIN_PREFIX + username;
+        String key = StrUtil.format(REDIS_USER_ALREADY_LOGIN_IN_KEY, username);
         stringRedisTemplate.delete(key);
     }
 }

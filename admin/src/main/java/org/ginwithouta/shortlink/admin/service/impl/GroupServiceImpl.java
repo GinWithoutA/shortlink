@@ -16,8 +16,8 @@ import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
 import org.redisson.api.RLock;
@@ -30,7 +30,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.LOCK_GROUP_CREATE_KEY;
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.REDIS_LOCK_GROUP_CREATE_KEY;
 import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCodeEnums.GROUP_CREATE_EXCEED_MAX;
 import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCodeEnums.GROUP_DELETE_FAIL;
 
@@ -62,7 +62,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
     @Override
     public void saveGroup(String username, String groupName) {
-        RLock lock = redissonClient.getLock(String.format(LOCK_GROUP_CREATE_KEY, username));
+        RLock lock = redissonClient.getLock(String.format(REDIS_LOCK_GROUP_CREATE_KEY, username, groupName));
         lock.lock();
         try {
             LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getUsername, username);

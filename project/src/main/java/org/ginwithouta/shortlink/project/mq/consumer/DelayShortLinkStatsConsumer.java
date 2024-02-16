@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.LockSupport;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.DELAY_QUEUE_STATS_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_DELAY_QUEUE_STATS_KEY;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.SHORT_LINK_STATS_MQ_NOT_ACCOMPLISH;
 
 /**
@@ -40,7 +40,7 @@ public class DelayShortLinkStatsConsumer implements InitializingBean {
                     return thread;
                 }
         ).execute(() -> {
-            RBlockingDeque<ShortLinkStatsRecordDTO> blockingDeque = redissonClient.getBlockingDeque(DELAY_QUEUE_STATS_KEY);
+            RBlockingDeque<ShortLinkStatsRecordDTO> blockingDeque = redissonClient.getBlockingDeque(REDIS_DELAY_QUEUE_STATS_KEY);
             RDelayedQueue<ShortLinkStatsRecordDTO> delayedQueue = redissonClient.getDelayedQueue(blockingDeque);
             while (Boolean.TRUE) {
                 try {

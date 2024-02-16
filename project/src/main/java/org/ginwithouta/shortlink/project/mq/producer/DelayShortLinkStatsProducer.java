@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.DELAY_QUEUE_STATS_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_DELAY_QUEUE_STATS_KEY;
 
 /**
  * @author Ginwithouta
@@ -28,7 +28,7 @@ public class DelayShortLinkStatsProducer {
      */
     public void send(ShortLinkStatsRecordDTO statsRecord) {
         statsRecord.setKeys(UUID.fastUUID().toString());
-        RBlockingDeque<ShortLinkStatsRecordDTO> blockingDeque = redissonClient.getBlockingDeque(DELAY_QUEUE_STATS_KEY);
+        RBlockingDeque<ShortLinkStatsRecordDTO> blockingDeque = redissonClient.getBlockingDeque(REDIS_DELAY_QUEUE_STATS_KEY);
         RDelayedQueue<ShortLinkStatsRecordDTO> delayedQueue = redissonClient.getDelayedQueue(blockingDeque);
         delayedQueue.offer(statsRecord, 5, TimeUnit.SECONDS);
     }

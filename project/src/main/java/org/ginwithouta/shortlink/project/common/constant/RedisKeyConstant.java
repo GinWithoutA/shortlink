@@ -10,31 +10,40 @@ public class RedisKeyConstant {
     /**
      * 短链接跳转前缀Key
      */
-    public static final String GOTO_SHORT_LINK_KEY = "short-link:goto:%s";
+    public static final String REDIS_GOTO_SHORT_LINK_KEY = "short-link:goto:%s";
 
     /**
      * 短链接跳转分布式锁前缀Key
      */
-    public static final String LOCK_GOTO_SHORT_LINK_KEY = "short-link:goto:goto:%s";
+    public static final String REDIS_LOCK_GOTO_SHORT_LINK_KEY = "short-link:lock:goto:%s";
 
     /**
      * 短链接跳转是否为空 Key
      */
-    public static final String GOTO_IS_NULL_SHORT_LINK_KEY = "short-link:goto:is-null:%s";
+    public static final String REDIS_GOTO_SHORT_LINK_IS_NULL_KEY = "short-link:goto:is-null:%s";
 
     /**
      * 短链接延迟队列消费统计 Key
      */
-    public static final String DELAY_QUEUE_STATS_KEY = "short-link:delay-queue:stats";
+    public static final String REDIS_DELAY_QUEUE_STATS_KEY = "short-link:delay-queue:stats:%s";
 
     /**
      * 短链接修改分组 ID 锁前缀 Key
      */
-    public static final String LOCK_GID_UPDATE_KEY = "short-link:lock:update-gid:%s";
+    public static final String REDIS_LOCK_GID_UPDATE_KEY = "short-link:lock:update-gid:%s";
 
     /**
      * 消息队列中短链接监控消费者
      */
-    public static final String CONSUMER_SHORT_LINK_STATS = "stream_consumer_short-link_stats_";
+    public static final String REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY = "short-link:stream:stat:consumer:%s";
 
+    /**
+     * 短链接基础信息统计中 UV 用户标识前缀（用于判断当前用户是否访问过）
+     */
+    public static final String SHORT_LINK_STATS_UV_KEY = "short-link:stats:uv:";
+
+    /**
+     * 短链接基础信息统计中 UIP 用户标识前缀（用于判断当前 IP 是否访问过）
+     */
+    public static final String REDIS_PREFIX_LINK_STATS_UIP = "short-link:stats:uip:";
 }

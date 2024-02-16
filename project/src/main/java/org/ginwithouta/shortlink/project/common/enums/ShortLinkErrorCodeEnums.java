@@ -17,7 +17,8 @@ public enum ShortLinkErrorCodeEnums implements IErrorCode {
     SHORT_LINK_NOT_EXIST("B000304", "【短链接】操作短链接失败，该短链接不存在"),
     SHORT_LINK_STATS_MQ_NOT_ACCOMPLISH("B000401", "【短链接统计消息队列】消息未完成，请稍后重试"),
     SHORT_LINK_GID_UPDATE_NOT_AVALIABLE("B000402", "【短链接分组更新】更新失败，当前短链接正在被访问"),
-    SHORT_LINK_BLACK_LIST("B000501", "【短链接异常】非法网址，不得跳转");
+    SHORT_LINK_BLACK_LIST("B000501", "【短链接异常】非法网址，不得跳转"),
+    SYSTEM_BUSY("A000600", "系统繁忙，请稍后再试");
 
     private final String code;
 

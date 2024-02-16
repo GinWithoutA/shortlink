@@ -1,5 +1,6 @@
 package org.ginwithouta.shortlink.project.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.common.convention.result.Result;
@@ -12,10 +13,13 @@ import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateBatchRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkCreateRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import org.ginwithouta.shortlink.project.dto.resp.ShortLinkPageRespDTO;
+import org.ginwithouta.shortlink.project.handler.CustomBlockHandler;
 import org.ginwithouta.shortlink.project.service.ShortLinkService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static org.ginwithouta.shortlink.project.common.constant.SentinelConstant.SENTINEL_CREATE_RULE_NAME;
 
 /**
  * @Package : org.ginwithouta.shortlink.project.controller
@@ -34,6 +38,11 @@ public class ShortLinkController {
      * 创建短链接
      */
     @PostMapping(value = "create")
+    @SentinelResource(
+            value = SENTINEL_CREATE_RULE_NAME,
+            blockHandler = "createShortLinkBlockHandlerMethod",
+            blockHandlerClass = CustomBlockHandler.class
+    )
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         return Results.success(shortLinkService.createShorLink(requestParam));
     }

@@ -25,6 +25,11 @@ spring:
     view:
       prefix: /templates/
       suffix: .html
+  cloud:
+    sentinel:
+      transport:
+        client-ip: localhost:8686
+        port: 8719
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

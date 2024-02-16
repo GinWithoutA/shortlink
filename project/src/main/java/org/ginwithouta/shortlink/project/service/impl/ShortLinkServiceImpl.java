@@ -23,7 +23,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.ginwithouta.shortlink.project.common.convention.exception.ClientException;
 import org.ginwithouta.shortlink.project.common.convention.exception.ServiceException;
-import org.ginwithouta.shortlink.project.config.GotoDomainWhiteListConfiguration;
+import org.ginwithouta.shortlink.project.config.GotoDomainWhiteListConfig;
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
@@ -95,7 +95,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkStatsTodayService shortLinkTodayStatsService;
     private final ShortLinkGoToMapper shortLinkGoToMapper;
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
-    private final GotoDomainWhiteListConfiguration gotoDomain;
+    private final GotoDomainWhiteListConfig gotoDomain;
 
     @Value("${short-link.domain.default}")
     private String defaultDomain;

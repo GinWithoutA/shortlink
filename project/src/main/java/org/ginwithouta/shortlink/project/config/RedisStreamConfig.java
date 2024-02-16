@@ -1,5 +1,6 @@
 package org.ginwithouta.shortlink.project.config;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.mq.consumer.ShortLinkStatsSaveConsumer;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,7 +20,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.CONSUMER_SHORT_LINK_STATS;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY;
 
 /**
  * @author Ginwithouta
@@ -49,7 +50,7 @@ public class RedisStreamConfig {
                 new LinkedBlockingQueue<>(),
                 runnable -> {
                     Thread thread = new Thread(runnable);
-                    thread.setName(CONSUMER_SHORT_LINK_STATS + index.incrementAndGet());
+                    thread.setName(StrUtil.format(REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY, index.incrementAndGet()));
                     thread.setDaemon(true);
                     return thread;
                 });

@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.project.config;
+package org.ginwithouta.shortlink.project.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;

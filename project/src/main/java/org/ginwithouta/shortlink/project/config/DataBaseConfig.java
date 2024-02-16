@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
  * @Desc :
  */
 @Configuration
-public class DataBaseConfiguration {
+public class DataBaseConfig {
 
     /**
      * 添加分页插件

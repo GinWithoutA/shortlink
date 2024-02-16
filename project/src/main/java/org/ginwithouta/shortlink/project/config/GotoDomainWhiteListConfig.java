@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 @Component
 @ConfigurationProperties(prefix = "short-link.goto-domain.white-list")
-public class GotoDomainWhiteListConfiguration {
+public class GotoDomainWhiteListConfig {
     /**
      * 是否开启跳转原始链接域名白名单验证
      */

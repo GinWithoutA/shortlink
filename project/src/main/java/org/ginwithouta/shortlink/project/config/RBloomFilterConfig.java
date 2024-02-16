@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
  * @Desc :
  */
 @Configuration
-public class RBloomFilterConfiguration {
+public class RBloomFilterConfig {
 
     /**
      * 防止短链接创建查询数据库的布隆过滤器

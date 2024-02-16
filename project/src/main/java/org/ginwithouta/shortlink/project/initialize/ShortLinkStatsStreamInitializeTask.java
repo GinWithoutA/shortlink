@@ -18,7 +18,7 @@ import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant
 public class ShortLinkStatsStreamInitializeTask implements InitializingBean {
     private final StringRedisTemplate stringRedisTemplate;
     @Override
-    public void afterPropertiesSet() throws Exception {
+    public void afterPropertiesSet() {
         Boolean hasKey = stringRedisTemplate.hasKey(REDIS_STREAM_SHORT_LINK_STATS_TOPIC_KEY);
         if (hasKey == null || !hasKey) {
             stringRedisTemplate.opsForStream().createGroup(REDIS_STREAM_SHORT_LINK_STATS_TOPIC_KEY, REDIS_STREAM_SHORT_LINK_STATS_GROUP_KEY);

@@ -128,7 +128,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
         } catch (DuplicateKeyException ex) {
             // 多线程情况下，可能有多个线程获取到同一个短链接，并判空
-            log.warn("短链接：并发异常，{} 重复入库", shortLinkDO.getFullShortUrl());
+            log.warn("短链接 {} 重复入库", fullShortLinkUrl);
             throw new ServiceException(SHORT_LINK_BLOOM_FAIL);
         }
         // 创建的短链接直接放到 Redis 缓存中
@@ -208,8 +208,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         int customGenerateCount = 1;
         String shortUri;
         while (true) {
+            // 高并发场景中，使用 System.currentTimeMillis() 很容出现生成的 URI 相同的情况，如果都是同一原始连接，很可能生成的都是相同的 URI
             originUrl = StrBuilder.create(originUrl)
-                    .append(System.currentTimeMillis())
+                    .append(UUID.randomUUID().toString())
                     .toString();
             shortUri = HashUtil.hashToBase62(originUrl);
             if (!shortUriCreateCachePenetrationBloomFilter.contains(StrBuilder.create(domain)

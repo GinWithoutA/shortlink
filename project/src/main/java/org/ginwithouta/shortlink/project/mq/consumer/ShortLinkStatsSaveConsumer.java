@@ -59,7 +59,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
     private final StringRedisTemplate stringRedisTemplate;
 
     @Value("${short-link.stats.locale.amap-key}")
-    private String statsLocaleAmapKey;
+    private String statsLocaleAMapKey;
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
@@ -121,7 +121,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
              * 短链接监控之地区（通过高德地图 API 获取当前访问所属地区）
              */
             Map<String, Object> localeParamMap = new HashMap<>();
-            localeParamMap.put("key", statsLocaleAmapKey);
+            localeParamMap.put("key", statsLocaleAMapKey);
             localeParamMap.put("ip", statsRecord.getRemoteAddr());
             String localeResultStr = HttpUtil.get(AMAP_REMOTE_URL, localeParamMap);
             JSONObject localeResultObj = JSON.parseObject(localeResultStr);

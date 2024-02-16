@@ -59,7 +59,7 @@ public class DelayShortLinkStatsConsumer implements InitializingBean {
                             log.error("延迟记录短链接监控消费异常", ex);
                         }
                         messageQueueIdempotentHandler.setAccomplish(statsRecord.getKeys());
-                        continue;
+                        break;
                     }
                     LockSupport.parkUntil(500);
                 } catch (Throwable ignored) {

@@ -541,7 +541,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.lastIndexOf("/"), fullShortUrl.length()));
             ((HttpServletResponse) response).addCookie(uvCookie);
             // TODO 这种直接存 redis 的方式涉及到要存多久，短链接越来越多的时候，很可能发生影响，后续重构要进行修改
-            stringRedisTemplate.opsForSet().add(SHORT_LINK_STATS_UV_KEY + fullShortUrl, uvFlag.get());
+            stringRedisTemplate.opsForSet().add(StrUtil.format(REDIS_SHORT_LINK_STATS_UV_KEY, fullShortUrl), uvFlag.get());
             uvFirstFlag.set(Boolean.TRUE);
         };
         if (ArrayUtil.isNotEmpty(cookies)) {
@@ -552,7 +552,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .ifPresentOrElse(each -> {
                         // 当前名称 uv 的 Cookie 存在，先将当前用户存储起来，然后判断当前用户 each 是否之前访问过该短链接
                         uvFlag.set(each);
-                        Long uvAdded = stringRedisTemplate.opsForSet().add(SHORT_LINK_STATS_UV_KEY + fullShortUrl, each);
+                        Long uvAdded = stringRedisTemplate.opsForSet().add(StrUtil.format(REDIS_SHORT_LINK_STATS_UV_KEY, fullShortUrl), each);
                         uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
                     }, addResponseCookieTask);
 
@@ -566,7 +566,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         String device = LinkUtil.getDevice((HttpServletRequest) request);
         String network = LinkUtil.getNetwork(remoteAddr);
         // TODO 和前面的 UV 一样的问题，如何保证大数据量不会将内存撑爆
-        Long uipAdded = stringRedisTemplate.opsForSet().add(REDIS_PREFIX_LINK_STATS_UIP + fullShortUrl, remoteAddr);
+        Long uipAdded = stringRedisTemplate.opsForSet().add(StrUtil.format(REDIS_SHORT_LINK_STATS_UIP_KEY, fullShortUrl), remoteAddr);
         boolean uipFirstFlag = uipAdded != null && uipAdded > 0;
         return ShortLinkStatsRecordDTO.builder()
                 .fullShortUrl(fullShortUrl)

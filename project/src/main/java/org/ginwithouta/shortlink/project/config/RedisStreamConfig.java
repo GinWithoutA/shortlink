@@ -3,7 +3,6 @@ package org.ginwithouta.shortlink.project.config;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.mq.consumer.ShortLinkStatsSaveConsumer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -20,7 +19,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.*;
 
 /**
  * @author Ginwithouta
@@ -32,11 +31,6 @@ import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant
 public class RedisStreamConfig {
     private final RedisConnectionFactory redisConnectionFactory;
     private final ShortLinkStatsSaveConsumer shortLinkStatsSaveConsumer;
-
-    @Value("${spring.data.redis.channel-topic.short-link-stats}")
-    private String topic;
-    @Value("${spring.data.redis.channel-topic.short-link-stats-group}")
-    private String group;
 
     @Bean
     public ExecutorService asyncStreamConsumer() {
@@ -69,8 +63,8 @@ public class RedisStreamConfig {
                         .build();
         StreamMessageListenerContainer<String, MapRecord<String, String, String>> streamMessageListenerContainer =
                 StreamMessageListenerContainer.create(redisConnectionFactory, options);
-        streamMessageListenerContainer.receiveAutoAck(Consumer.from(group, "stats-consumer"),
-                StreamOffset.create(topic, ReadOffset.lastConsumed()), shortLinkStatsSaveConsumer);
+        streamMessageListenerContainer.receiveAutoAck(Consumer.from(REDIS_STREAM_SHORT_LINK_STATS_GROUP_KEY, "stats-consumer"),
+                StreamOffset.create(REDIS_STREAM_SHORT_LINK_STATS_TOPIC_KEY, ReadOffset.lastConsumed()), shortLinkStatsSaveConsumer);
         return streamMessageListenerContainer;
     }
 

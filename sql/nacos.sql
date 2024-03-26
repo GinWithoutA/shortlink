@@ -18,6 +18,8 @@
 /*   数据库全名 = nacos_config   */
 /*   表名称 = config_info   */
 /******************************************/
+CREATE DATABASE `nacos_config`;
+USE `nacos_config`;
 CREATE TABLE `config_info` (
                                `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
                                `data_id` varchar(255) NOT NULL COMMENT 'data_id',

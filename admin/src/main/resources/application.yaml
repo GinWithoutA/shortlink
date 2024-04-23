@@ -26,7 +26,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 47.113.145.127:8848
+        server-addr: 47.94.0.36:8848
 mybatis-plus:
   global-config:
     db-config:

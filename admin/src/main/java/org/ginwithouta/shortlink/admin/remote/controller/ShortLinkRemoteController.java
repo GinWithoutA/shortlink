@@ -6,6 +6,7 @@ import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.remote.dto.req.*;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.*;
 import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkStatsRemoteService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,11 @@ public class ShortLinkRemoteController {
      * 远程调用接口
      */
     private final ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {};
+
+    /**
+     * 远程调用统计接口
+     */
+    private final ShortLinkStatsRemoteService linkStatsRemoteService = new ShortLinkStatsRemoteService() {};
 
     /**
      * 远程调用创建短链接
@@ -74,4 +80,37 @@ public class ShortLinkRemoteController {
     public Result<String> getTitleByUrl(@RequestParam(name = "url") String url) {
         return shortLinkRemoteService.getTitleByUrl(url);
     }
+
+    /**
+     * 远程调用单个短链接详细监控数据访问
+     */
+    @GetMapping(value = "stats")
+    public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {
+        return linkStatsRemoteService.oneShortLinkStatistics(requestParam);
+    }
+
+    /**
+     * 分组短链接详细监控数据访问
+     */
+    @GetMapping(value = "stats/group")
+    public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+        return linkStatsRemoteService.groupShortLinkStatistics(requestParam);
+    }
+
+    /**
+     * 远程调用单个短链接访问日志监控数据
+     */
+    @GetMapping(value = "stats/access/record")
+    public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
+        return linkStatsRemoteService.shortLinkStatsAccessRecord(requestParam);
+    }
+
+    /**
+     * 分组短链接访问日志监控数据
+     */
+    @GetMapping(value = "stats/access/record/group")
+    public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return linkStatsRemoteService.shortLinkGroupStatsAccessRecord(requestParam);
+    }
+
 }

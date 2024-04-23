@@ -104,7 +104,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Override
     public ShortLinkCreateRespDTO createShorLink(ShortLinkCreateReqDTO requestParam) {
         verificationWShiteList(requestParam.getOriginUrl());
-        String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), defaultDomain);
+        String shortLinkSuffix = generateSuffix(requestParam.getOriginUrl(), requestParam.getDomain());
         String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                 .append("/")
                 .append(shortLinkSuffix)
@@ -113,7 +113,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         shortLinkDO.setFullShortUrl(fullShortLinkUrl);
         shortLinkDO.setShortUri(shortLinkSuffix);
         shortLinkDO.setDescription(requestParam.getDescribe());
-        shortLinkDO.setDomain(defaultDomain);
+        shortLinkDO.setDomain(requestParam.getDomain());
         // TODO 恶意请求有风险，后续要改成异步的
         shortLinkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
         // 创建短链接的时候同时插入路由记录
@@ -128,7 +128,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 throw new ServiceException(SHORT_LINK_CREATE_FAIL);
             }
         } catch (DuplicateKeyException ex) {
-            // 多线程情况下，可能有多个线程获取到同一个短链接，并判空
+            // 首先判断是否存在布隆过滤器，如果不存在直接新增
+            if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortLinkUrl)) {
+                shortUriCreateCachePenetrationBloomFilter.add(fullShortLinkUrl);
+            }
             log.warn("短链接 {} 重复入库", fullShortLinkUrl);
             throw new ServiceException(SHORT_LINK_BLOOM_FAIL);
         }
@@ -155,13 +158,13 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         List<ShortLinkDO> shortLinkSaveBatch = new ArrayList<>();
         List<ShortLinkGoToDO> shortLinkGoToSaveBatch = new ArrayList<>();
         for (int i = 0; i < requestParam.getOriginUrls().size(); ++i) {
-            String shortLinkSuffix = generateSuffix(requestParam.getOriginUrls().get(i), defaultDomain);
+            String shortLinkSuffix = generateSuffix(requestParam.getOriginUrls().get(i), requestParam.getDomain());
             String fullShortLinkUrl = StrBuilder.create(requestParam.getDomain())
                     .append("/")
                     .append(shortLinkSuffix)
                     .toString();
             ShortLinkDO shortLinkDO = BeanUtil.toBean(requestParam, ShortLinkDO.class);
-            shortLinkDO.setDomain(defaultDomain);
+            shortLinkDO.setDomain(requestParam.getDomain());
             shortLinkDO.setOriginUrl(requestParam.getOriginUrls().get(i));
             shortLinkDO.setDescription(requestParam.getDescribes().get(i));
             shortLinkDO.setFullShortUrl(fullShortLinkUrl);
@@ -435,13 +438,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @SneakyThrows
     @Override
     public void redirectUrl(String shortUri, ServletRequest request, ServletResponse response) {
-        String serverName = /* DOMAIN_PREFIX + */ request.getServerName();
-        String serverPort = Optional.of(request.getServerPort())
-                .filter(each -> !Objects.equals(each, 80))
-                .map(String::valueOf)
-                .map(each -> ":" + each)
-                .orElse("");
-        String fullShortUrl = StrBuilder.create(serverName).append(serverPort).append("/").append(shortUri).toString();
+        String serverName = request.getServerName();
+        String fullShortUrl = StrBuilder.create(serverName).append("/").append(shortUri).toString();
         // 先查缓存，如果有就直接返回
         String originLink = stringRedisTemplate.opsForValue().get(String.format(REDIS_GOTO_SHORT_LINK_KEY, fullShortUrl));
         if (StrUtil.isNotBlank(originLink)) {

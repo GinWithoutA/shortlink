@@ -2,6 +2,8 @@
 <project version="4">
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/project/src/main/java/org/ginwithouta/shortlink/project/dao/mapper/ShortLinkStatsMapper.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/sql/main.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/sql/nacos.sql" dialect="MySQL" />
     <file url="PROJECT" dialect="MySQL" />
   </component>
 </project>

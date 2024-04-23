@@ -29,7 +29,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 
-import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.LOCK_GID_UPDATE_KEY;
+import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_LOCK_GID_UPDATE_KEY;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
 import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeEnums.SHORT_LINK_STATS_MQ_NOT_ACCOMPLISH;
 
@@ -66,6 +66,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         String stream = message.getStream();
         RecordId id = message.getId();
         if (!messageQueueIdempotentHandler.isMessageProcessed(id.toString())) {
+            // 防止异常情况导致没有执行完成，需要添加完成标识，
             if (messageQueueIdempotentHandler.isAccomplish(id.toString())) {
                 return;
             }
@@ -81,7 +82,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
             }
             stringRedisTemplate.opsForStream().delete(Objects.requireNonNull(stream), id.getValue());
         } catch (Throwable ex) {
-            // 某某某情况宕机了
+            // 某某某情况宕机了，最多就是10分钟不能用
             messageQueueIdempotentHandler.delMessageProcessed(id.toString());
             log.error("记录短链接监控消费异常", ex);
         }
@@ -90,7 +91,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
 
     public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
         fullShortUrl = Optional.ofNullable(fullShortUrl).orElse(statsRecord.getFullShortUrl());
-        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(LOCK_GID_UPDATE_KEY, fullShortUrl));
+        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(REDIS_LOCK_GID_UPDATE_KEY, fullShortUrl));
         RLock rLock = readWriteLock.readLock();
         if (!rLock.tryLock()) {
             // 如果当前获取不到所资源，就把这部分操作放到消息队列里面，一会再进行操作
@@ -139,6 +140,7 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                         .country("中国")
                         .gid(gid)
                         .date(new Date())
+                        .cnt(1)
                         .build();
                 shortLinkLocaleStatsMapper.shortLinkStatsLocale(localeStatsDO);
             }

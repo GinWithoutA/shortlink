@@ -4,8 +4,8 @@ dataSources:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
     jdbcUrl: jdbc:mysql://47.113.145.127/shortlink?useUnicode=true&characterEncoding=UTF-8&rewriteBatchedStatements=true&allowMultiQueries=true&serverTimezone=Asia/Shanghai
-    username: root
-    password: mysql1234
+    username: link
+    password: 123456
 
 rules:
   - !SHARDING

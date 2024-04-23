@@ -1,8 +1,3 @@
-create database shortlink;
-use shortlink;
-create schema link collate utf8mb4_general_ci;
-use link;
-
 create table t_group_0
 (
     id          bigint auto_increment comment 'ID'
@@ -1148,8 +1143,7 @@ create table t_link_stats_today_0
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_1
 (
     id             bigint auto_increment comment 'ID'
@@ -1165,8 +1159,7 @@ create table t_link_stats_today_1
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_2
 (
     id             bigint auto_increment comment 'ID'
@@ -1182,8 +1175,7 @@ create table t_link_stats_today_2
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_3
 (
     id             bigint auto_increment comment 'ID'
@@ -1199,8 +1191,7 @@ create table t_link_stats_today_3
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_4
 (
     id             bigint auto_increment comment 'ID'
@@ -1216,8 +1207,7 @@ create table t_link_stats_today_4
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_5
 (
     id             bigint auto_increment comment 'ID'
@@ -1233,8 +1223,7 @@ create table t_link_stats_today_5
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_6
 (
     id             bigint auto_increment comment 'ID'
@@ -1250,8 +1239,7 @@ create table t_link_stats_today_6
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_7
 (
     id             bigint auto_increment comment 'ID'
@@ -1267,8 +1255,7 @@ create table t_link_stats_today_7
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_8
 (
     id             bigint auto_increment comment 'ID'
@@ -1284,8 +1271,7 @@ create table t_link_stats_today_8
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_9
 (
     id             bigint auto_increment comment 'ID'
@@ -1301,8 +1287,7 @@ create table t_link_stats_today_9
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_10
 (
     id             bigint auto_increment comment 'ID'
@@ -1318,8 +1303,7 @@ create table t_link_stats_today_10
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_11
 (
     id             bigint auto_increment comment 'ID'
@@ -1335,8 +1319,7 @@ create table t_link_stats_today_11
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_12
 (
     id             bigint auto_increment comment 'ID'
@@ -1352,8 +1335,7 @@ create table t_link_stats_today_12
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_13
 (
     id             bigint auto_increment comment 'ID'
@@ -1369,8 +1351,7 @@ create table t_link_stats_today_13
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_14
 (
     id             bigint auto_increment comment 'ID'
@@ -1386,8 +1367,7 @@ create table t_link_stats_today_14
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 create table t_link_stats_today_15
 (
     id             bigint auto_increment comment 'ID'
@@ -1403,6 +1383,5 @@ create table t_link_stats_today_15
     del_flag       tinyint(1)                    null comment '删除标识 0：未删除 1：已删除',
     constraint `idx_unique_full-short-url`
         unique (full_short_url, gid, date)
-)
-    charset = utf8mb4;
+);
 

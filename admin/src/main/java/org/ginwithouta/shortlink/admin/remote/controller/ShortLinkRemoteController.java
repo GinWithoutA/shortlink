@@ -1,12 +1,12 @@
 package org.ginwithouta.shortlink.admin.remote.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
 import org.ginwithouta.shortlink.admin.remote.dto.req.*;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.*;
-import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
-import org.ginwithouta.shortlink.admin.remote.service.ShortLinkStatsRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,26 +18,21 @@ import java.util.List;
  * @Desc : 短链接后管控制层
  */
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/api/short/link/admin/v1/")
 public class ShortLinkRemoteController {
 
     /**
-     * TODO 后续重构为 Spring Cloud
-     * 远程调用接口
+     * 重构为 Spring Cloud 远程调用接口
      */
-    private final ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {};
-
-    /**
-     * 远程调用统计接口
-     */
-    private final ShortLinkStatsRemoteService linkStatsRemoteService = new ShortLinkStatsRemoteService() {};
+    private final ShortLinkFeignRemoteService shortLinkFeignRemoteService;
 
     /**
      * 远程调用创建短链接
      */
     @PostMapping(value = "create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
-        return shortLinkRemoteService.createShorLink(requestParam);
+        return shortLinkFeignRemoteService.createShorLink(requestParam);
     }
 
     /**
@@ -45,7 +40,7 @@ public class ShortLinkRemoteController {
      */
     @PostMapping(value = "create/batch")
     public Result<ShortLinkCreateBatchRespDTO> createBatchShortLink(@RequestBody ShortLinkCreateBatchReqDTO requestParam) {
-        return shortLinkRemoteService.createBatchShortLink(requestParam);
+        return shortLinkFeignRemoteService.createBatchShortLink(requestParam);
     }
 
     /**
@@ -53,7 +48,7 @@ public class ShortLinkRemoteController {
      */
     @PostMapping(value = "update")
     public Result<Void> update(@RequestBody ShortLinkUpdateReqDTO requestParam) {
-        shortLinkRemoteService.updateShortLink(requestParam);
+        shortLinkFeignRemoteService.updateShortLink(requestParam);
         return Results.success();
     }
 
@@ -61,8 +56,11 @@ public class ShortLinkRemoteController {
      * HTTP请求远程调用分页查询短链接
      */
     @GetMapping(value = "page")
-    public Result<IPage<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
-        return shortLinkRemoteService.pageShortLinkList(requestParam);
+    public Result<Page<ShortLinkPageRespDTO>> pageShortLinkList(ShortLinkPageReqDTO requestParam) {
+        /*
+         * 这里需要使用 Page 充当返回类型，而不是 IPage，因为 Feign 调用获得结果反序列化的时候 IPage 是接口无法进行反序列化，需要使用具体实现类
+         */
+        return shortLinkFeignRemoteService.pageShortLinkList(requestParam.getGid(), requestParam.getOrderTag(), requestParam.getCurrent(), requestParam.getSize());
     }
 
     /**
@@ -70,7 +68,7 @@ public class ShortLinkRemoteController {
      */
     @GetMapping(value = "count")
     public Result<List<ShortLinkGroupCountQueryRespDTO>> listGroupShortLinkCount(@RequestParam("requestParam") List<String> requestParams) {
-        return shortLinkRemoteService.listGroupShortLinkCount(requestParams);
+        return shortLinkFeignRemoteService.listGroupShortLinkCount(requestParams);
     }
 
     /**
@@ -78,7 +76,7 @@ public class ShortLinkRemoteController {
      */
     @GetMapping(value = "title")
     public Result<String> getTitleByUrl(@RequestParam(name = "url") String url) {
-        return shortLinkRemoteService.getTitleByUrl(url);
+        return shortLinkFeignRemoteService.getTitleByUrl(url);
     }
 
     /**
@@ -86,7 +84,7 @@ public class ShortLinkRemoteController {
      */
     @GetMapping(value = "stats")
     public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {
-        return linkStatsRemoteService.oneShortLinkStatistics(requestParam);
+        return shortLinkFeignRemoteService.oneShortLinkStats(requestParam);
     }
 
     /**
@@ -94,23 +92,23 @@ public class ShortLinkRemoteController {
      */
     @GetMapping(value = "stats/group")
     public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
-        return linkStatsRemoteService.groupShortLinkStatistics(requestParam);
+        return shortLinkFeignRemoteService.groupShortLinkStats(requestParam);
     }
 
     /**
      * 远程调用单个短链接访问日志监控数据
      */
     @GetMapping(value = "stats/access/record")
-    public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
-        return linkStatsRemoteService.shortLinkStatsAccessRecord(requestParam);
+    public Result<Page<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
+        return shortLinkFeignRemoteService.oneShortLinkStatsAccessRecord(requestParam);
     }
 
     /**
      * 分组短链接访问日志监控数据
      */
     @GetMapping(value = "stats/access/record/group")
-    public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
-        return linkStatsRemoteService.shortLinkGroupStatsAccessRecord(requestParam);
+    public Result<Page<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return shortLinkFeignRemoteService.shortLinkGroupStatsAccessRecord(requestParam);
     }
 
 }

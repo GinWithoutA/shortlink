@@ -17,7 +17,7 @@ import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupSortReqDTO;
 import org.ginwithouta.shortlink.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import org.ginwithouta.shortlink.admin.dto.resp.ShortLinkGroupRespDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.ShortLinkRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.ginwithouta.shortlink.admin.service.GroupService;
 import org.ginwithouta.shortlink.admin.toolkit.RandomGenerator;
 import org.redisson.api.RLock;
@@ -44,16 +44,11 @@ import static org.ginwithouta.shortlink.admin.common.enums.ShortLinkGroupErrorCo
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+    private final ShortLinkFeignRemoteService shortLinkRemoteService;
     private final RedissonClient redissonClient;
 
     @Value("${short-link.group.max-num}")
     private Integer groupMaxNum;
-
-    /**
-     * TODO 后续重构为 Spring Cloud
-     * 远程调用接口
-     */
-    private final ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {};
 
     @Override
     public void saveGroup(String groupName) {

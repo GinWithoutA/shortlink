@@ -66,10 +66,10 @@ public interface ShortLinkAccessLogsMapper extends BaseMapper<ShortLinkAccessLog
             "       CASE WHEN MIN(create_time) BETWEEN #{requestParam.startDate} AND #{requestParam.endDate} THEN '新访客' ELSE '老访客' END AS uvType " +
             "   FROM t_access_logs WHERE" +
             "       full_short_url = #{requestParam.fullShortUrl} " +
-            "       AND gid = #{requestParam.gid} AND user IN " +
+            "       AND gid = #{requestParam.gid} AND user IN (" +
             "           <foreach item=\"item\" index=\"index\" collection=\"userAccessLogsList\" open=\"(\" separator=\",\" close=\")\"> " +
             "               #{item}" +
-            "           </foreach> " +
+            "           </foreach> ) " +
             "   GROUP BY user; " +
             "</script> ")
     List<Map<String, Object>> selectUvTypeByUsers(@Param("requestParam") UvTypeMapperDTO requestParam, @Param("userAccessLogsList") List<String> userAccessLogsList);

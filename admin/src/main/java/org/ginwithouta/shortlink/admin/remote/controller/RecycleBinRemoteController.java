@@ -1,6 +1,6 @@
 package org.ginwithouta.shortlink.admin.remote.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.common.convention.result.Result;
 import org.ginwithouta.shortlink.admin.common.convention.result.Results;
@@ -9,7 +9,8 @@ import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRemoveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRestoreReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.RecycleBinService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -21,18 +22,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/short/link/admin/v1/recycle/bin/")
 public class RecycleBinRemoteController {
 
+    private final RecycleBinService recycleBinRemoteService;
     /**
-     * TODO 后续重构为 Spring Cloud
-     * 远程调用接口
+     * 重构为 Spring Cloud 远程调用接口
      */
-    private final RecycleBinRemoteService recycleBinRemoteService;
+    private final ShortLinkFeignRemoteService recycleBinFeignRemoteService;
 
     /**
      * 远程调用保存回收站接口
      */
     @PostMapping(value = "save")
     public Result<Void> saveRecycleBin(@RequestBody RecycleBinSaveReqDTO requestParam) {
-        recycleBinRemoteService.saveRecycleBin(requestParam);
+        recycleBinFeignRemoteService.saveRecycleBin(requestParam);
         return Results.success();
     }
 
@@ -40,7 +41,7 @@ public class RecycleBinRemoteController {
      * HTTP请求远程调用分页查询回收站短链接
      */
     @GetMapping(value = "page")
-    public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam) {
+    public Result<Page<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam) {
         return recycleBinRemoteService.pageRecycleBinList(requestParam);
     }
 
@@ -49,7 +50,7 @@ public class RecycleBinRemoteController {
      */
     @PostMapping(value = "recover")
     public Result<Void> restoreRecycleBin(@RequestBody RecycleBinRestoreReqDTO requestParam) {
-        recycleBinRemoteService.restoreRecycleBin(requestParam);
+        recycleBinFeignRemoteService.restoreRecycleBin(requestParam);
         return Results.success();
     }
 
@@ -58,7 +59,7 @@ public class RecycleBinRemoteController {
      */
     @PostMapping(value = "remove")
     public Result<Void> removeRecycleBin(@RequestBody RecycleBinRemoveReqDTO requestParam) {
-        recycleBinRemoteService.removeRecycleBin(requestParam);
+        recycleBinFeignRemoteService.removeRecycleBin(requestParam);
         return Results.success();
     }
 }

@@ -1,12 +1,9 @@
 package org.ginwithouta.shortlink.admin.remote.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.admin.biz.user.UserContext;
 import org.ginwithouta.shortlink.admin.common.convention.exception.ServiceException;
@@ -15,7 +12,8 @@ import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
+import org.ginwithouta.shortlink.admin.remote.service.RecycleBinService;
+import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -30,12 +28,13 @@ import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.US
  */
 @Service
 @RequiredArgsConstructor
-public class RecycleBinRemoteServiceImpl implements RecycleBinRemoteService {
+public class RecycleBinServiceImpl implements RecycleBinService {
 
+    private final ShortLinkFeignRemoteService recycleBinFeignRemoteService;
     private final GroupMapper groupMapper;
 
     @Override
-    public Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam) {
+    public Result<Page<ShortLinkPageRespDTO>> pageRecycleBinList(RecycleBinPageReqDTO requestParam) {
         LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
                 .eq(GroupDO::getUsername, UserContext.getUsername());
         List<GroupDO> groupDOList = groupMapper.selectList(queryWrapper);
@@ -46,7 +45,6 @@ public class RecycleBinRemoteServiceImpl implements RecycleBinRemoteService {
         requestMap.put("gidList", groupDOList.stream().map(GroupDO::getGid).toList());
         requestMap.put("current", requestParam.getCurrent());
         requestMap.put("size", requestParam.getSize());
-        String resultPage = HttpUtil.get(URL_PREFIX + "page", requestMap);
-        return JSON.parseObject(resultPage, new TypeReference<>() {});
+        return recycleBinFeignRemoteService.pageRecycleBinList(groupDOList.stream().map(GroupDO::getGid).toList(), requestParam.getCurrent(), requestParam.getSize());
     }
 }

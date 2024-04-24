@@ -491,6 +491,10 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
                 .between(ShortLinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .orderByDesc(ShortLinkAccessLogsDO::getCreateTime);
         IPage<ShortLinkAccessLogsDO> accessDoPages = accessLogsMapper.selectPage(requestParam, lambdaQueryWrapper);
+        if (accessDoPages.getRecords().isEmpty()) {
+            // 还没有用户访问，直接返回
+            return null;
+        }
         List<String> userAccessLogsList = accessDoPages.getRecords()
                 .stream()
                 .map(ShortLinkAccessLogsDO::getUser)
@@ -516,6 +520,10 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
                 .between(ShortLinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .orderByDesc(ShortLinkAccessLogsDO::getCreateTime);
         IPage<ShortLinkAccessLogsDO> accessDoPages = accessLogsMapper.selectPage(requestParam, lambdaQueryWrapper);
+        if (accessDoPages.getRecords().isEmpty()) {
+            // 如果没有人访问，那么返回空
+            return null;
+        }
         List<String> userAccessLogsList = accessDoPages.getRecords()
                 .stream()
                 .map(ShortLinkAccessLogsDO::getUser)

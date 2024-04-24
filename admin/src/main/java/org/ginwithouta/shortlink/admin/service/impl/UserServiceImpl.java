@@ -37,10 +37,7 @@ import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant
 import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.*;
 
 /**
- * @Package : org.ginwithouta.shortlink.admin.service.impl
- * @Author : NONO Wang
- * @Date : 2023 - 11月 - 周二
- * @Desc : 用户接口实现层
+ * 用户接口实现层
  */
 @Service
 @Slf4j

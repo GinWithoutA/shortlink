@@ -33,7 +33,8 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.*;
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.REDIS_LOCK_USER_REGISTER_KEY;
+import static org.ginwithouta.shortlink.admin.common.constant.RedisCacheConstant.REDIS_USER_ALREADY_LOGIN_IN_KEY;
 import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.*;
 
 /**
@@ -113,6 +114,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         String key = StrUtil.format(REDIS_USER_ALREADY_LOGIN_IN_KEY, requestParam.getUsername());
         Map<Object, Object> isAlreadyLoginMap = stringRedisTemplate.opsForHash().entries(key);
         if (CollUtil.isNotEmpty(isAlreadyLoginMap)) {
+            stringRedisTemplate.expire(key, 30L, TimeUnit.MINUTES);
             String token = isAlreadyLoginMap.keySet().stream()
                     .findFirst()
                     .map(Object::toString)
@@ -121,7 +123,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         }
         String uuid = UUID.randomUUID().toString();
         stringRedisTemplate.opsForHash().put(key, uuid, JSON.toJSONString(userDO));
-        // TODO: 网关还没加进来，为了方便直接将Token设置成30天
         stringRedisTemplate.expire(key, 30L, TimeUnit.DAYS);
         return new UserLoginRespDTO(uuid);
     }

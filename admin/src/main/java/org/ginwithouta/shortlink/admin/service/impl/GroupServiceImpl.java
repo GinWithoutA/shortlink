@@ -2,6 +2,7 @@ package org.ginwithouta.shortlink.admin.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -57,7 +58,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
 
     @Override
     public void saveGroup(String username, String groupName) {
-        RLock lock = redissonClient.getLock(String.format(REDIS_LOCK_GROUP_CREATE_KEY, username, groupName));
+        RLock lock = redissonClient.getLock(StrUtil.format(REDIS_LOCK_GROUP_CREATE_KEY, username, groupName));
         lock.lock();
         try {
             LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class).eq(GroupDO::getUsername, username);

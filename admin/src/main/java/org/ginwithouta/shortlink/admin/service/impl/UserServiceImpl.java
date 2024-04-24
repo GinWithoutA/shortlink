@@ -122,6 +122,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             return new UserLoginRespDTO(token);
         }
         String uuid = UUID.randomUUID().toString();
+        // 用户有关的 Token 存放在 Redis 中，每次验证从 Redis 中进行获取
         stringRedisTemplate.opsForHash().put(key, uuid, JSON.toJSONString(userDO));
         stringRedisTemplate.expire(key, 30L, TimeUnit.DAYS);
         return new UserLoginRespDTO(uuid);

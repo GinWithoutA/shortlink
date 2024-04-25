@@ -12,7 +12,7 @@ import org.ginwithouta.shortlink.admin.dao.entity.GroupDO;
 import org.ginwithouta.shortlink.admin.dao.mapper.GroupMapper;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinPageReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.RecycleBinService;
+import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
 import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +28,7 @@ import static org.ginwithouta.shortlink.admin.common.enums.UserErrorCodeEnums.US
  */
 @Service
 @RequiredArgsConstructor
-public class RecycleBinServiceImpl implements RecycleBinService {
+public class RecycleBinRemoteServiceImpl implements RecycleBinRemoteService {
 
     private final ShortLinkFeignRemoteService recycleBinFeignRemoteService;
     private final GroupMapper groupMapper;

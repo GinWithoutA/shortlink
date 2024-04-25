@@ -25,7 +25,7 @@ public class RedisKeyConstant {
     /**
      * 短链接延迟队列消费统计 Key
      */
-    public static final String REDIS_DELAY_QUEUE_STATS_KEY = "short-link:delay-queue:stats:%s";
+    public static final String REDIS_DELAY_QUEUE_STATS_KEY = "short-link:delay-queue:stats:";
 
     /**
      * 短链接修改分组 ID 锁前缀 Key

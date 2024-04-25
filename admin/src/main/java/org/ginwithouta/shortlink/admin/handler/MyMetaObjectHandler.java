@@ -1,7 +1,8 @@
-package org.ginwithouta.shortlink.admin.config;
+package org.ginwithouta.shortlink.admin.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -12,7 +13,8 @@ import java.time.LocalDateTime;
  * @Date : 2023 - 11月 - 周四
  * @Desc : MybatisPlus自动注入
  */
-@Component
+@Primary
+@Component(value = "myMetaObjectHandlerByAdmin")
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override

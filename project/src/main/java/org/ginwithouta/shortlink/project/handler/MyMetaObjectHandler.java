@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * @Date : 2023 - 11月 - 周四
  * @Desc : MybatisPlus自动注入
  */
-@Component
+@Component(value = "myMetaObjectHandlerByProject")
 public class MyMetaObjectHandler implements MetaObjectHandler {
 
     @Override

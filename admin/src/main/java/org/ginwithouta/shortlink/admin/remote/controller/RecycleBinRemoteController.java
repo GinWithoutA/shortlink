@@ -9,7 +9,7 @@ import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRemoveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinRestoreReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.req.RecycleBinSaveReqDTO;
 import org.ginwithouta.shortlink.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.ginwithouta.shortlink.admin.remote.service.RecycleBinService;
+import org.ginwithouta.shortlink.admin.remote.service.RecycleBinRemoteService;
 import org.ginwithouta.shortlink.admin.remote.service.ShortLinkFeignRemoteService;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(value = "/api/short/link/admin/v1/recycle/bin/")
 public class RecycleBinRemoteController {
 
-    private final RecycleBinService recycleBinRemoteService;
+    private final RecycleBinRemoteService recycleBinRemoteService;
     /**
      * 重构为 Spring Cloud 远程调用接口
      */

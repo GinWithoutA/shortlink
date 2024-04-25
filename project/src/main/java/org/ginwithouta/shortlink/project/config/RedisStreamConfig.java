@@ -1,6 +1,5 @@
 package org.ginwithouta.shortlink.project.config;
 
-import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import org.ginwithouta.shortlink.project.mq.consumer.ShortLinkStatsSaveConsumer;
 import org.springframework.context.annotation.Bean;
@@ -44,7 +43,7 @@ public class RedisStreamConfig {
                 new LinkedBlockingQueue<>(),
                 runnable -> {
                     Thread thread = new Thread(runnable);
-                    thread.setName(StrUtil.format(REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY, index.incrementAndGet()));
+                    thread.setName(String.format(REDIS_STREAM_SHORT_LINK_STATS_CONSUMER_KEY, index.incrementAndGet()));
                     thread.setDaemon(true);
                     return thread;
                 });

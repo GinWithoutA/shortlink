@@ -26,7 +26,7 @@ import java.util.Optional;
  * @Desc : 全局异常拦截
  */
 @Slf4j
-@Component
+@Component("globalExceptionHandlerByAdmin")
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**

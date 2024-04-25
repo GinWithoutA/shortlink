@@ -10,7 +10,7 @@ import org.springframework.cloud.openfeign.SpringQueryMap;
  * @author Ginwithouta
  * Generate at 2023/11/26
  */
-public interface RecycleBinService {
+public interface RecycleBinRemoteService {
 
     /**
      * 远程调用分页查询回收站短链接

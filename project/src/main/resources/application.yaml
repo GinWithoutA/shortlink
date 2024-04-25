@@ -3,24 +3,17 @@ server:
 spring:
   application:
     name: short-link-project-service
+  profiles:
+    active: dev
   datasource:
     # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
     driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
     # shardingsphere 配置文件路径
     url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
-  data:
-    redis:
-      port: 6379
-      host: 47.113.145.127
-      password: 123456
   mvc:
     view:
       prefix: /templates/
       suffix: .html
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 47.94.0.36:8848
 #    sentinel:
 #      transport:
 #        client-ip: localhost:8686

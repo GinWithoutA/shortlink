@@ -1,0 +1,13 @@
+spring:
+  data:
+    redis:
+      port: 6379
+      host: 47.113.145.127
+      password: 123456
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 47.94.0.36:8848
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml

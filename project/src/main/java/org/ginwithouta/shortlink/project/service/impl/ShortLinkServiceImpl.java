@@ -86,7 +86,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkAccessLogsMapper shortLinkAccessLogsMapper;
     private final ShortLinkStatsMapper shortLinkStatsMapper;
     private final ShortLinkOsStatsMapper shortLinkOsStatsMapper;
-    private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
+    private final RBloomFilter<String> shortLinkUriCachePenetrationBloomFilter;
     private final ShortLinkDeviceStatsMapper shortLinkDeviceStatsMapper;
     private final ShortLinkLocaleStatsMapper shortLinkLocaleStatsMapper;
     private final ShortLinkNetworkStatsMapper shortLinkNetworkStatsMapper;
@@ -130,8 +130,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             }
         } catch (DuplicateKeyException ex) {
             // 首先判断是否存在布隆过滤器，如果不存在直接新增
-            if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortLinkUrl)) {
-                shortUriCreateCachePenetrationBloomFilter.add(fullShortLinkUrl);
+            if (!shortLinkUriCachePenetrationBloomFilter.contains(fullShortLinkUrl)) {
+                shortLinkUriCachePenetrationBloomFilter.add(fullShortLinkUrl);
             }
             log.warn("短链接 {} 重复入库", fullShortLinkUrl);
             throw new ServiceException(SHORT_LINK_BLOOM_FAIL);
@@ -141,7 +141,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 String.format(REDIS_GOTO_SHORT_LINK_KEY, shortLinkDO.getFullShortUrl()),
                 requestParam.getOriginUrl(),
                 getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
-        shortUriCreateCachePenetrationBloomFilter.add(shortLinkDO.getFullShortUrl());
+        shortLinkUriCachePenetrationBloomFilter.add(shortLinkDO.getFullShortUrl());
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl(shortLinkDO.getFullShortUrl())
                 .originUrl(shortLinkDO.getOriginUrl())
@@ -194,7 +194,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     String.format(REDIS_GOTO_SHORT_LINK_KEY, each.getFullShortUrl()),
                     each.getOriginUrl(),
                     getLinkCacheValidDate(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
-            shortUriCreateCachePenetrationBloomFilter.add(each.getFullShortUrl());
+            shortLinkUriCachePenetrationBloomFilter.add(each.getFullShortUrl());
         });
         return ShortLinkCreateBatchRespDTO.builder()
                 .fullShortUrls(fullShortUrls)
@@ -218,7 +218,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .append(UUID.randomUUID().toString())
                     .toString();
             shortUri = HashUtil.hashToBase62(originUrl);
-            if (!shortUriCreateCachePenetrationBloomFilter.contains(StrBuilder.create(domain)
+            if (!shortLinkUriCachePenetrationBloomFilter.contains(StrBuilder.create(domain)
                     .append("/")
                     .append(shortUri)
                     .toString())) {
@@ -313,10 +313,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
              */
             RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(REDIS_LOCK_GID_UPDATE_KEY, requestParam.getFullShortUrl()));
             RLock rLock = readWriteLock.writeLock();
-            if (!rLock.tryLock()) {
-                // TODO 后续可以修改为消息队列来做
-                throw new ServiceException(SHORT_LINK_GID_UPDATE_NOT_AVALIABLE);
-            }
+            rLock.lock();
             try {
                 LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
                         .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
@@ -449,12 +446,12 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
         if (StrUtil.isNotBlank(originLink)) {
             // 跳转前完成对应短链接的统计，此时由于直接从 redis 中获取，没有 gid
             ShortLinkStatsRecordDTO statsRecord = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
-            shortLinkStats(fullShortUrl, null, statsRecord);
+            shortLinkStats(statsRecord);
             ((HttpServletResponse) response).sendRedirect(originLink);
             return ;
         }
         // 查询第一层布隆过滤器，查询当前请求的 fullShortLink 是否存在，如果不存在，表明数据库中不存在，直接重定向到不存在页面
-        if (!shortUriCreateCachePenetrationBloomFilter.contains(fullShortUrl)) {
+        if (!shortLinkUriCachePenetrationBloomFilter.contains(fullShortUrl)) {
             ((HttpServletResponse) response).sendRedirect(REDIRECT_TO_NOT_FOUND_URI);
             return;
         }
@@ -473,7 +470,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             originLink = stringRedisTemplate.opsForValue().get(String.format(REDIS_GOTO_SHORT_LINK_KEY, fullShortUrl));
             if (StrUtil.isNotBlank(originLink)) {
                 ShortLinkStatsRecordDTO statsRecord = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
-                shortLinkStats(fullShortUrl, null, statsRecord);
+                shortLinkStats(statsRecord);
                 ((HttpServletResponse) response).sendRedirect(originLink);
                 return ;
             }
@@ -507,7 +504,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     TimeUnit.MILLISECONDS);
             // 跳转前完成对应短链接的统计
             ShortLinkStatsRecordDTO statsRecord = buildLinkStatsRecordAndSetUser(fullShortUrl, request, response);
-            shortLinkStats(fullShortUrl, shortLinkDO.getGid(), statsRecord);
+            shortLinkStats(statsRecord);
             ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
         } finally {
             lock.unlock();
@@ -516,14 +513,10 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     /**
      * 短链接跳转时完成对应对链接的统计
-     * @param fullShortUrl  完整短链接
-     * @param gid           短链接分组标识
      */
     @Override
-    public void shortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
+    public void shortLinkStats(ShortLinkStatsRecordDTO statsRecord) {
         Map<String, String> producerMap = new HashMap<>();
-        producerMap.put("fullShortUrl", fullShortUrl);
-        producerMap.put("gid", gid);
         producerMap.put("statsRecord", JSON.toJSONString(statsRecord));
         shortLinkStatsSaveProducer.send(producerMap);
     }

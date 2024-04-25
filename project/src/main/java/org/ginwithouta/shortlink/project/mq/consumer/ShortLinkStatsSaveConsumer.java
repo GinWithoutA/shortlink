@@ -15,7 +15,6 @@ import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
 import org.ginwithouta.shortlink.project.dto.req.StatsIncrementMapperDTO;
 import org.ginwithouta.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
-import org.ginwithouta.shortlink.project.mq.producer.DelayShortLinkStatsProducer;
 import org.ginwithouta.shortlink.project.service.ShortLinkGoToService;
 import org.redisson.api.RLock;
 import org.redisson.api.RReadWriteLock;
@@ -27,7 +26,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_LOCK_GID_UPDATE_KEY;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
@@ -44,7 +46,6 @@ import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeE
 public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRecord<String, String, String>> {
 
     private final RedissonClient redissonClient;
-    private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
     private final ShortLinkGoToService shortLinkGoToService;
     private final ShortLinkStatsMapper shortLinkStatsMapper;
     private final ShortLinkLocaleStatsMapper shortLinkLocaleStatsMapper;
@@ -74,37 +75,34 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         }
         try {
             Map<String, String> producerMap = message.getValue();
-            String fullShortUrl = producerMap.get("fullShortUrl");
-            if (StrUtil.isNotBlank(fullShortUrl)) {
-                String gid = producerMap.get("gid");
-                ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
-                actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
-            }
+            ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
+            actualSaveShortLinkStats(statsRecord);
             stringRedisTemplate.opsForStream().delete(Objects.requireNonNull(stream), id.getValue());
         } catch (Throwable ex) {
             // 某某某情况宕机了，最多就是10分钟不能用
             messageQueueIdempotentHandler.delMessageProcessed(id.toString());
             log.error("记录短链接监控消费异常", ex);
+            throw ex;
         }
         messageQueueIdempotentHandler.setAccomplish(id.toString());
     }
 
-    public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
-        fullShortUrl = Optional.ofNullable(fullShortUrl).orElse(statsRecord.getFullShortUrl());
+    public void actualSaveShortLinkStats(ShortLinkStatsRecordDTO statsRecord) {
+        String fullShortUrl = statsRecord.getFullShortUrl();
         RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(REDIS_LOCK_GID_UPDATE_KEY, fullShortUrl));
         RLock rLock = readWriteLock.readLock();
-        if (!rLock.tryLock()) {
-            // 如果当前获取不到所资源，就把这部分操作放到消息队列里面，一会再进行操作
-            delayShortLinkStatsProducer.send(statsRecord);
-            return;
-        }
+        rLock.lock();
+        /*
+         * 这里不再使用延迟队列
+         * 原先我们使用延迟队列，是用来保证在高并发情况下，当当前锁已经被获取了之后，其他线程阻塞导致 Tomcat 线程池不断有新线程阻塞，最终OOM
+         * 当我们添加了消息队列了之后，所有的这些请求都会在消息队列中，处理都交由消息队列匀速处理，因此不会出现 OOM 的情况
+         * 此时，延迟队列的效果就没有这么大了
+         */
         try {
-            if (StrUtil.isBlank(gid)) {
-                LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
-                        .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(queryWrapper);
-                gid = shortLinkGoToDO.getGid();
-            }
+            LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
+                    .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
+            ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(queryWrapper);
+            String gid = shortLinkGoToDO.getGid();
             int week = DateUtil.dayOfWeekEnum(new Date()).getIso8601Value();
             int hour = DateUtil.hour(new Date(), true);
             ShortLinkStatsDO statisticsDO = ShortLinkStatsDO.builder()

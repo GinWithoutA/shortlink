@@ -18,6 +18,7 @@ import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant
  * 延迟消费短链接统计消息生产者
  */
 @Component
+@Deprecated
 @RequiredArgsConstructor
 public class DelayShortLinkStatsProducer {
     private final RedissonClient redissonClient;

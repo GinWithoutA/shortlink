@@ -5,11 +5,6 @@ spring:
     name: short-link-project-service
   profiles:
     active: dev
-  datasource:
-    # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
-    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    # shardingsphere 配置文件路径
-    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:dev}.yaml
   mvc:
     view:
       prefix: /templates/

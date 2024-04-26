@@ -1,8 +1,16 @@
 spring:
+  data:
+    redis:
+      host: 172.24.23.38
+      port: 6379
+      password: S8A1qmLF7nhGSvxEDZkeKw==
   cloud:
+    nacos:
+      discovery:
+        server-addr: 172.24.23.38:8848
     gateway:
       routes:
-        - id: short-link-admin-aggregation-service
+        - id: short-link-admin-service
           uri: lb://short-link-aggregation-service/api/short/link/admin/**
           predicates:
             - Path=/api/short/link/admin/**
@@ -13,7 +21,7 @@ spring:
                   - /api/short/link/admin/v1/user/login
                   - /api/short/link/admin/v1/user/has-username
 
-        - id: short-link-project-aggregation-service
+        - id: short-link-project-service
           uri: lb://short-link-aggregation-service/api/short/link/project/**
           predicates:
             - Path=/api/short/link/project/**

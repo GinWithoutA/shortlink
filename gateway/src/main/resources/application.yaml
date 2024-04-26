@@ -4,14 +4,5 @@ spring:
   application:
     name: short-link-gateway-service
   profiles:
-    # active: aggregation
-    active: dev
-  data:
-    redis:
-      host: 47.113.145.127
-      port: 6379
-      password: 123456
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 47.94.0.36:8848
+    active: prod
+    # active: dev

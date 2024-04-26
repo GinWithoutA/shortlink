@@ -3,7 +3,7 @@ spring:
     redis:
       host: 47.113.145.127
       port: 6379
-      password: 123456
+      password: S8A1qmLF7nhGSvxEDZkeKw==
   cloud:
     nacos:
       discovery:

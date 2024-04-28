@@ -79,8 +79,8 @@ public class ShortLinkRemoteController {
         return shortLinkFeignRemoteService.getTitleByUrl(url);
     }
 
-    /**
-     * 远程调用单个短链接详细监控数据访问
+    /**远程调用单个短链接详细监控数据访问
+     *
      */
     @GetMapping(value = "stats")
     public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {

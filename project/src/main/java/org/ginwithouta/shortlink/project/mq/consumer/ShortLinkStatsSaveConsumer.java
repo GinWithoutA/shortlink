@@ -13,7 +13,7 @@ import org.ginwithouta.shortlink.project.common.convention.exception.ServiceExce
 import org.ginwithouta.shortlink.project.dao.entity.*;
 import org.ginwithouta.shortlink.project.dao.mapper.*;
 import org.ginwithouta.shortlink.project.dto.biz.ShortLinkStatsRecordDTO;
-import org.ginwithouta.shortlink.project.dto.req.StatsIncrementMapperDTO;
+import org.ginwithouta.shortlink.project.dto.biz.StatsIncrementMapperDTO;
 import org.ginwithouta.shortlink.project.mq.idempotent.MessageQueueIdempotentHandler;
 import org.ginwithouta.shortlink.project.service.ShortLinkGoToService;
 import org.redisson.api.RLock;
@@ -26,10 +26,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.stream.StreamListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 import static org.ginwithouta.shortlink.project.common.constant.RedisKeyConstant.REDIS_LOCK_GID_UPDATE_KEY;
 import static org.ginwithouta.shortlink.project.common.constant.ShortLinkConstant.AMAP_REMOTE_URL;
@@ -75,8 +72,12 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         }
         try {
             Map<String, String> producerMap = message.getValue();
-            ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
-            actualSaveShortLinkStats(statsRecord);
+            String fullShortUrl = producerMap.get("fullShortUrl");
+            if (StrUtil.isNotBlank(fullShortUrl)) {
+                String gid = producerMap.get("gid");
+                ShortLinkStatsRecordDTO statsRecord = JSON.parseObject(producerMap.get("statsRecord"), ShortLinkStatsRecordDTO.class);
+                actualSaveShortLinkStats(fullShortUrl, gid, statsRecord);
+            }
             stringRedisTemplate.opsForStream().delete(Objects.requireNonNull(stream), id.getValue());
         } catch (Throwable ex) {
             // 某某某情况宕机了，最多就是10分钟不能用
@@ -87,8 +88,8 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
         messageQueueIdempotentHandler.setAccomplish(id.toString());
     }
 
-    public void actualSaveShortLinkStats(ShortLinkStatsRecordDTO statsRecord) {
-        String fullShortUrl = statsRecord.getFullShortUrl();
+    public void actualSaveShortLinkStats(String fullShortUrl, String gid, ShortLinkStatsRecordDTO statsRecord) {
+        fullShortUrl = Optional.ofNullable(fullShortUrl).orElse(statsRecord.getFullShortUrl());
         RReadWriteLock readWriteLock = redissonClient.getReadWriteLock(String.format(REDIS_LOCK_GID_UPDATE_KEY, fullShortUrl));
         RLock rLock = readWriteLock.readLock();
         rLock.lock();
@@ -99,23 +100,24 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
          * 此时，延迟队列的效果就没有这么大了
          */
         try {
-            LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
-                    .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
-            ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(queryWrapper);
-            String gid = shortLinkGoToDO.getGid();
+            if (StrUtil.isBlank(gid)) {
+                LambdaQueryWrapper<ShortLinkGoToDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGoToDO.class)
+                        .eq(ShortLinkGoToDO::getFullShortUrl, fullShortUrl);
+                ShortLinkGoToDO shortLinkGoToDO = shortLinkGoToService.getOne(queryWrapper);
+                gid = shortLinkGoToDO.getGid();
+            }
             int week = DateUtil.dayOfWeekEnum(new Date()).getIso8601Value();
             int hour = DateUtil.hour(new Date(), true);
-            ShortLinkStatsDO statisticsDO = ShortLinkStatsDO.builder()
+            ShortLinkStatsDO statsDO = ShortLinkStatsDO.builder()
                     .pv(1)
                     .uv(statsRecord.getUvFirstFlag() ? 1 : 0)
                     .uip(statsRecord.getUipFirstFlag() ? 1 : 0)
                     .hour(hour)
                     .weekday(week)
                     .fullShortUrl(fullShortUrl)
-                    .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkStatsMapper.shortLinkStatistics(statisticsDO);
+            shortLinkStatsMapper.shortLinkStats(statsDO);
             /*
              * 短链接监控之地区（通过高德地图 API 获取当前访问所属地区）
              */
@@ -136,11 +138,10 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                         .city(actualCity = unknownFlag ? "未知" : localeResultObj.getString("city"))
                         .adcode(unknownFlag ? "未知" : localeResultObj.getString("adcode"))
                         .country("中国")
-                        .gid(gid)
                         .date(new Date())
                         .cnt(1)
                         .build();
-                shortLinkLocaleStatsMapper.shortLinkStatsLocale(localeStatsDO);
+                shortLinkLocaleStatsMapper.shortLinkLocaleStats(localeStatsDO);
             }
             /*
              * 短链接监控之操作系统
@@ -149,10 +150,9 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .os(statsRecord.getOs())
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
-                    .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkOsStatsMapper.shortLinkOsStatistics(shortLinkOsStatisticsDO);
+            shortLinkOsStatsMapper.shortLinkOsStats(shortLinkOsStatisticsDO);
             /*
              * 短链接监控之浏览器
              */
@@ -160,10 +160,9 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .browser(statsRecord.getBrowser())
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
-                    .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkBrowserStatsMapper.shortLinkBrowserStatistics(shortLinkStatsBrowserDO);
+            shortLinkBrowserStatsMapper.shortLinkStatsBrowser(shortLinkStatsBrowserDO);
             /*
              * 短链接监控之设备
              */
@@ -171,10 +170,9 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .device(statsRecord.getDevice())
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
-                    .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkDeviceStatsMapper.shortLinkDeviceStatistics(shortLinkDeviceStatisticsDO);
+            shortLinkDeviceStatsMapper.shortLinkDeviceStats(shortLinkDeviceStatisticsDO);
             /*
              * 短链接监控之网络
              */
@@ -182,10 +180,9 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .network(statsRecord.getNetwork())
                     .fullShortUrl(fullShortUrl)
                     .cnt(1)
-                    .gid(gid)
                     .date(new Date())
                     .build();
-            shortLinkNetworkStatsMapper.shortLinkNetworkStatistics(shortLinkNetworkStatisticsDO);
+            shortLinkNetworkStatsMapper.shortLinkNetworkStats(shortLinkNetworkStatisticsDO);
             /*
              * 短链接监控之访问日志
              *  （1）高频 IP
@@ -200,15 +197,14 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .network(statsRecord.getNetwork())
                     .locale(StrUtil.join("-", "中国", actualProvince, actualCity))
                     .device(statsRecord.getDevice())
-                    .gid(gid)
                     .build();
             shortLinkAccessLogsMapper.insert(shortLinkAccessLogsDO);
             /*
              * 短链接数据自增（PV UV UIP）
              */
             StatsIncrementMapperDTO incrementMapperDTO = StatsIncrementMapperDTO.builder()
-                    .fullShortUrl(fullShortUrl)
                     .gid(gid)
+                    .fullShortUrl(fullShortUrl)
                     .totalUv(statsRecord.getUvFirstFlag() ? 1 : 0)
                     .totalPv(1)
                     .totalUip(statsRecord.getUipFirstFlag() ? 1 : 0)
@@ -221,7 +217,6 @@ public class ShortLinkStatsSaveConsumer implements StreamListener<String, MapRec
                     .todayUv(statsRecord.getUvFirstFlag() ? 1 : 0)
                     .todayPv(1)
                     .todayUip(statsRecord.getUipFirstFlag() ? 1 : 0)
-                    .gid(gid)
                     .fullShortUrl(fullShortUrl)
                     .date(new Date())
                     .build();

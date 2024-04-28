@@ -1,5 +1,8 @@
 package org.ginwithouta.shortlink.project;
 
+import java.security.SecureRandom;
+import java.util.Base64;
+
 /**
  * @Package : org.nageoffer.shorlink.admin.test
  * @Author : NONO Wang
@@ -66,9 +69,30 @@ public class ShortLinkTableShardingTest {
                 charset = utf8mb4;
             """;
 
+    private static final String GTOUP = """
+            create table t_group_%d
+            (
+                id          bigint auto_increment comment 'ID'
+                    primary key,
+                gid         varchar(32)          null comment '短链接分组标识',
+                name        varchar(64)          null comment '短链接名称',
+                username    varchar(256)         null comment '创建分组的创建人',
+                sort_order  int                  null comment '分组排序',
+                create_time datetime             null comment '创建时间',
+                update_time datetime             null comment '修改时间',
+                del_flag    tinyint(1) default 0 null comment '逻辑删除标识位： 0 未删除； 1 已删除',
+                constraint idx_unique_username_gid unique (gid, username) using BTREE
+            )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+            """;
+
     public static void main(String[] args) {
-        for (int i = 0; i < 16; ++i) {
-            System.out.printf(SQL, i);
-        }
+        // for (int i = 0; i < 16; ++i) {
+        //     System.out.printf(GTOUP, i);
+        // }
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[16]; // 16 字节 = 128 位
+        random.nextBytes(bytes);
+        String password = Base64.getEncoder().encodeToString(bytes);
+        System.out.println("Generated password: " + password);
     }
 }

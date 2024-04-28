@@ -18,34 +18,40 @@ import java.util.List;
 public interface ShortLinkDeviceStatsMapper extends BaseMapper<ShortLinkDeviceStatsDO> {
 
     /**
-     * 记录访问设备访问数据
-     * @param deviceStatisticsDO 短链接访问设备监控入参
+     * 短链接访问设备监控信息录入
+     * @param deviceStatsDO 实体
      */
     @Insert("INSERT INTO" +
-            "  t_device_statistics (full_short_url, gid, date, cnt, device, create_time, update_time, del_flag) " +
+            "  t_link_device_stats (full_short_url, date, cnt, device, create_time, update_time, del_flag) " +
             "VALUES " +
-            "  (#{deviceStatisticsDO.fullShortUrl}, #{deviceStatisticsDO.gid}, #{deviceStatisticsDO.date}, #{deviceStatisticsDO.cnt}, " +
-            "   #{deviceStatisticsDO.device}, NOW(), NOW(), 0) " +
-            "ON DUPLICATE KEY UPDATE" +
-            "  cnt = cnt + #{deviceStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkDeviceStatistics(@Param("deviceStatisticsDO") ShortLinkDeviceStatsDO deviceStatisticsDO);
+            "  (#{deviceStatsDO.fullShortUrl}, #{deviceStatsDO.date}, #{deviceStatsDO.cnt}, #{deviceStatsDO.device}, NOW(), NOW(), 0) " +
+            "ON DUPLICATE KEY UPDATE cnt = cnt + #{deviceStatsDO.cnt}, update_time = NOW(); ")
+    void shortLinkDeviceStats(@Param("deviceStatsDO") ShortLinkDeviceStatsDO deviceStatsDO);
 
     /**
-     * 短链接监控之访问设备响应 DTO
+     * 短链接访问设备监控信息获取
+     * @param requestParam  请求参数
+     * @return  详细信息
      */
-    @Select("SELECT device, SUM(cnt) AS cnt FROM t_device_statistics WHERE " +
-            "    full_short_url = #{requestParam.fullShortUrl} " +
-            "    AND gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY full_short_url, gid, device;")
+    @Select("SELECT tlds.device, SUM(tlds.cnt) AS cnt " +
+            "FROM t_link tl INNER JOIN t_link_device_stats tlds ON tl.full_short_url = tlds.full_short_url " +
+            "WHERE tlds.full_short_url = #{requestParam.fullShortUrl} " +
+            "   AND tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = #{requestParam.enableStatus} " +
+            "   AND tlds.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tlds.full_short_url, tl.gid, tlds.device;")
     List<ShortLinkDeviceStatsDO> listDeviceStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
-     * 短链接监控之访问设备响应 DTO
+     * 短链接分组监控之访问设备监控信息
+     * @param requestParam  请求入参
+     * @return  响应
      */
-    @Select("SELECT device, SUM(cnt) AS cnt FROM t_device_statistics WHERE " +
-            "    gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY gid, device;")
+    @Select("SELECT tlds.device, SUM(tlds.cnt) AS cnt " +
+            "FROM t_link tl INNER JOIN t_link_device_stats tlds ON tl.full_short_url = tlds.full_short_url " +
+            "WHERE tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = '1' " +
+            "   AND tlds.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tl.gid, tlds.device;")
     List<ShortLinkDeviceStatsDO> listDeviceStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

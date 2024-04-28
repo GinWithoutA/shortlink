@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import org.ginwithouta.shortlink.project.common.database.BaseDO;
 
-import java.util.Date;
-
 /**
  * @author Ginwithouta
  * Generate at 2023/12/1
@@ -15,23 +13,13 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_access_logs")
+@TableName("t_link_access_logs")
 @EqualsAndHashCode(callSuper = true)
 public class ShortLinkAccessLogsDO extends BaseDO {
     /**
      * 完整短链接
      */
     private String fullShortUrl;
-
-    /**
-     * 分组标识
-     */
-    private String gid;
-
-    /**
-     * 日期
-     */
-    private Date date;
 
     /**
      * 访问的浏览器

@@ -34,4 +34,9 @@ public class ShortLinkStatsAccessRecordReqDTO extends Page<ShortLinkAccessLogsDO
      * 监控数据的结束日期
      */
     private String endDate;
+
+    /**
+     * 启用标识 1：启用 0：未启用
+     */
+    private Integer enableStatus;
 }

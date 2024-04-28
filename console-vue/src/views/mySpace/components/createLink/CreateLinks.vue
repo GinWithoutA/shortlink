@@ -2,32 +2,18 @@
   <div>
     <el-form ref="ruleFormRef" :model="formData" :rules="formRule" label-width="80px">
       <el-form-item label="跳转链接" prop="originUrls">
-        <el-input
-          :rows="4"
-          v-model="formData.originUrls"
-          type="textarea"
-          placeholder="请输入http://或https://开头的链接或应用跳转链接，一行一个，最多100行"
-        />
+        <el-input :rows="4" v-model="formData.originUrls" type="textarea"
+          placeholder="请输入http://或https://开头的链接或应用跳转链接，一行一个，最多100行" />
         <span style="font-size: 12px">{{ originUrlRows + '/' + maxDescribeRows }}</span>
       </el-form-item>
       <el-form-item label="描述信息" prop="describes">
-        <el-input
-          v-loading="isLoading"
-          :rows="4"
-          v-model="formData.describes"
-          type="textarea"
-          placeholder="请输入描述信息，一行一个，描述信息行数请与链接行数相等"
-        />
+        <el-input v-loading="isLoading" :rows="4" v-model="formData.describes" type="textarea"
+          placeholder="请输入描述信息，一行一个，描述信息行数请与链接行数相等" />
         <span style="font-size: 12px">{{ describeRows + '/' + maxDescribeRows }}</span>
       </el-form-item>
       <el-form-item label="短链分组" prop="gid">
         <el-select v-model="formData.gid" placeholder="请选择">
-          <el-option
-            v-for="item in groupInfo"
-            :key="item.gid"
-            :label="item.name"
-            :value="item.gid"
-          />
+          <el-option v-for="item in groupInfo" :key="item.gid" :label="item.name" :value="item.gid" />
         </el-select>
       </el-form-item>
       <el-form-item label="有效期" prop="v">
@@ -37,25 +23,14 @@
         </el-radio-group>
       </el-form-item>
       <el-form-item v-if="formData.validDateType === 1" label="选择时间">
-        <el-date-picker
-          :disabled-date="disabledDate"
-          v-model="formData.validDate"
-          value-format="YYYY-MM-DD HH:mm:ss"
-          type="datetime"
-          placeholder="选择日期"
-          :shortcuts="shortcuts"
-        />
+        <el-date-picker :disabled-date="disabledDate" v-model="formData.validDate" value-format="YYYY-MM-DD HH:mm:ss"
+          enable type="datetime" placeholder="选择日期" :shortcuts="shortcuts" />
         <span class="alert">链接失效后将自动跳转到404页面 !</span>
       </el-form-item>
       <el-form-item>
         <div style="width: 100%; display: flex; justify-content: flex-end">
-          <el-button
-            class="buttons"
-            type="primary"
-            :disabled="submitDisable"
-            @click="onSubmit(ruleFormRef)"
-            >确认</el-button
-          >
+          <el-button class="buttons" type="primary" :disabled="submitDisable"
+            @click="onSubmit(ruleFormRef)">确认</el-button>
           <el-button class="buttons" @click="cancel">取消</el-button>
         </div>
       </el-form-item>

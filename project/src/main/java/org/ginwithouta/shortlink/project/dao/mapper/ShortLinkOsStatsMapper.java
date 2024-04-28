@@ -20,32 +20,33 @@ public interface ShortLinkOsStatsMapper extends BaseMapper<ShortLinkOsStatsDO> {
 
     /**
      * 记录操作系统访问监控数据
-     * @param osStatisticsDO 短链接操作系统统计入参
+     * @param osStatsDO 短链接操作系统统计入参
      */
-    @Insert("INSERT INTO" +
-            "  t_os_statistics (full_short_url, gid, date, cnt, os, create_time, update_time, del_flag) " +
-            "VALUES " +
-            "  (#{osStatisticsDO.fullShortUrl}, #{osStatisticsDO.gid}, #{osStatisticsDO.date}, #{osStatisticsDO.cnt}, " +
-            "   #{osStatisticsDO.os}, NOW(), NOW(), 0) " +
-            "ON DUPLICATE KEY UPDATE" +
-            "  cnt = cnt + #{osStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkOsStatistics(@Param("osStatisticsDO") ShortLinkOsStatsDO osStatisticsDO);
+    @Insert("INSERT INTO t_link_os_stats(full_short_url, date, cnt, os, create_time, update_time, del_flag) " +
+            "VALUES (#{osStatsDO.fullShortUrl}, #{osStatsDO.date}, #{osStatsDO.cnt}, #{osStatsDO.os}, NOW(), NOW(), 0) " +
+            "ON DUPLICATE KEY UPDATE cnt = cnt + #{osStatsDO.cnt}, update_time = NOW(); ")
+    void shortLinkOsStats(@Param("osStatsDO") ShortLinkOsStatsDO osStatsDO);
 
     /**
      * 根据短链接获取操作系统监控记录
      */
-    @Select("SELECT os, SUM(cnt) AS count FROM t_os_statistics WHERE " +
-            "    full_short_url = #{requestParam.fullShortUrl} " +
-            "    AND gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY full_short_url, gid, os;")
+    @Select("SELECT tlos.os, SUM(tlos.cnt) AS count " +
+            "FROM t_link tl INNER JOIN t_link_os_stats tlos ON tl.full_short_url = tlos.full_short_url " +
+            "WHERE tlos.full_short_url = #{requestParam.fullShortUrl} " +
+            "   AND tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = #{requestParam.enableStatus} " +
+            "   AND tlos.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tlos.full_short_url, tl.gid, tlos.os;")
     List<HashMap<String, Object>> listOsStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
      * 根据短链接获取操作系统监控记录
      */
-    @Select("SELECT os, SUM(cnt) AS count FROM t_os_statistics WHERE gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY gid, os;")
+    @Select("SELECT tlos.os, SUM(tlos.cnt) AS count " +
+            "FROM t_link tl INNER JOIN t_link_os_stats tlos ON tl.full_short_url = tlos.full_short_url " +
+            "WHERE tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = #{requestParam.enableStatus} " +
+            "   AND tlos.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tl.gid, tlos.os;")
     List<HashMap<String, Object>> listOsStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

@@ -20,11 +20,6 @@ import java.util.Date;
 public class ShortLinkTodayStatsDO extends BaseDO {
 
     /**
-     * 分组标识
-     */
-    private String gid;
-
-    /**
      * 短链接
      */
     private String fullShortUrl;

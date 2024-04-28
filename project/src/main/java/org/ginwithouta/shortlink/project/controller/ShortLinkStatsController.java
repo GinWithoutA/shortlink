@@ -27,14 +27,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(value = "/api/short/link/project/v1/stats/")
 public class ShortLinkStatsController {
 
-    private final ShortLinkStatsService shortLinkStatisticsService;
+    private final ShortLinkStatsService shortLinkStatsService;
 
     /**
-     * 单个短链接详细监控数据访问
+     * 单个短链接的详细监控数据
      */
     @GetMapping(value = "")
     public Result<ShortLinkStatsRespDTO> shortLinkStats(ShortLinkStatsReqDTO requestParam) {
-        return Results.success(shortLinkStatisticsService.oneShortLinkStatistics(requestParam));
+        return Results.success(shortLinkStatsService.shortLinkStats(requestParam));
     }
 
     /**
@@ -42,7 +42,7 @@ public class ShortLinkStatsController {
      */
     @GetMapping(value = "group")
     public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
-        return Results.success(shortLinkStatisticsService.groupShortLinkStatistics(requestParam));
+        return Results.success(shortLinkStatsService.shortLinkGroupStats(requestParam));
     }
 
     /**
@@ -50,7 +50,7 @@ public class ShortLinkStatsController {
      */
     @GetMapping(value = "access/record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
-        return Results.success(shortLinkStatisticsService.shortLinkStatsAccessRecord(requestParam));
+        return Results.success(shortLinkStatsService.shortLinkStatsAccessRecord(requestParam));
     }
 
     /**
@@ -58,7 +58,7 @@ public class ShortLinkStatsController {
      */
     @GetMapping(value = "access/record/group")
     public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
-        return Results.success(shortLinkStatisticsService.shortLinkGroupStatsAccessRecord(requestParam));
+        return Results.success(shortLinkStatsService.shortLinkGroupStatsAccessRecord(requestParam));
     }
 
 }

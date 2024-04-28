@@ -1,4 +1,4 @@
-package org.ginwithouta.shortlink.project.dto.req;
+package org.ginwithouta.shortlink.project.dto.biz;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,14 +16,14 @@ import lombok.NoArgsConstructor;
 public class StatsIncrementMapperDTO {
 
     /**
-     * 完整短链接
-     */
-    private String fullShortUrl;
-
-    /**
      * 分组标识
      */
     private String gid;
+
+    /**
+     * 完整短链接
+     */
+    private String fullShortUrl;
 
     /**
      * 历史 PV

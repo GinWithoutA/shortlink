@@ -68,11 +68,6 @@ public class ShortLinkGroupStatsRespDTO {
     private List<ShortLinkStatsOsRespDTO> osStats;
 
     /**
-     * 访客访问类型详情
-     */
-    private List<ShortLinkStatsUvRespDTO> uvTypeStats;
-
-    /**
      * 访问设备类型详情
      */
     private List<ShortLinkStatsDeviceRespDTO> deviceStats;

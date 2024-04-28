@@ -87,6 +87,11 @@ public class ShortLinkPageRespDTO {
     private Integer totalUip;
 
     /**
+     * 启用标识 1：启用 0：未启用
+     */
+    private Integer enableStatus;
+
+    /**
      * 今日 PV
      */
     private Integer todayPv;

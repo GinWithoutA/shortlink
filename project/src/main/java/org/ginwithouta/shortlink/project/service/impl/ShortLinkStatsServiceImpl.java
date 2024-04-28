@@ -40,8 +40,8 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
     private final ShortLinkNetworkStatsMapper statsNetworkMapper;
 
     @Override
-    public ShortLinkStatsRespDTO oneShortLinkStatistics(ShortLinkStatsReqDTO requestParam) {
-        List<ShortLinkStatsDO> statsListByShortLink = baseMapper.listStatisticsByShortLink(requestParam);
+    public ShortLinkStatsRespDTO shortLinkStats(ShortLinkStatsReqDTO requestParam) {
+        List<ShortLinkStatsDO> statsListByShortLink = baseMapper.listStatsByShortLink(requestParam);
         if (CollUtil.isEmpty(statsListByShortLink)) {
             // 如果当前短链接没有记录，直接返回 NULL 就行，不用管
             return null;
@@ -84,7 +84,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
          * 短链接监控之地区（仅国内）
          */
         List<ShortLinkStatsLocaleCNRespDTO> localeCNStats = new ArrayList<>();
-        List<ShortLinkLocaleStatsDO> listLocaleByShortLink = statsLocaleMapper.listLocaleByShortLink(requestParam);
+        List<ShortLinkLocaleStatsDO> listLocaleByShortLink = statsLocaleMapper.listLocaleStatsByShortLink(requestParam);
         int localeCNSum = listLocaleByShortLink.stream()
                 .mapToInt(ShortLinkLocaleStatsDO::getCnt)
                 .sum();
@@ -102,7 +102,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
          * 短链接监控之 24 小时访问分布情况
          */
         List<Integer> hoursStats = new ArrayList<>(24);
-        List<ShortLinkStatsDO> listHoursByShortLink = baseMapper.listHoursStatisticsByShortLink(requestParam);
+        List<ShortLinkStatsDO> listHoursByShortLink = baseMapper.listHoursStatsByShortLink(requestParam);
         for (int i = 0; i < 24; ++i) {
             AtomicInteger hour = new AtomicInteger(i);
             int hourCnt = listHoursByShortLink.stream()
@@ -262,7 +262,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
     }
 
     @Override
-    public ShortLinkGroupStatsRespDTO groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam) {
+    public ShortLinkGroupStatsRespDTO shortLinkGroupStats(ShortLinkGroupStatsReqDTO requestParam) {
         List<ShortLinkStatsDO> statsListByGroup = baseMapper.listStatsByGroup(requestParam);
         if (CollUtil.isEmpty(statsListByGroup)) {
             // 如果当前分组没有记录，直接返回 NULL 就行，不用管
@@ -306,7 +306,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
          * 短链接分组监控之地区（仅国内）
          */
         List<ShortLinkStatsLocaleCNRespDTO> localeCNStats = new ArrayList<>();
-        List<ShortLinkLocaleStatsDO> listLocaleByGroup = statsLocaleMapper.listLocaleByGroup(requestParam);
+        List<ShortLinkLocaleStatsDO> listLocaleByGroup = statsLocaleMapper.listLocaleStatsByGroup(requestParam);
         int localeCNSum = listLocaleByGroup.stream()
                 .mapToInt(ShortLinkLocaleStatsDO::getCnt)
                 .sum();
@@ -324,7 +324,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
          * 短链接分组监控之 24 小时访问分布情况
          */
         List<Integer> hoursStats = new ArrayList<>(24);
-        List<ShortLinkStatsDO> listHoursByGroup = baseMapper.listHoursStatisticsByGroup(requestParam);
+        List<ShortLinkStatsDO> listHoursByGroup = baseMapper.listHoursStatsByGroup(requestParam);
         for (int i = 0; i < 24; ++i) {
             AtomicInteger hour = new AtomicInteger(i);
             int hourCnt = listHoursByGroup.stream()
@@ -338,7 +338,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
          * 短链接分组监控之高频访问 IP
          */
         List<ShortLinkStatsTopIpRespDTO> topIpStats = new ArrayList<>();
-        List<HashMap<String, Object>> listTopIpByGroup = accessLogsMapper.listTopIpByGroup(requestParam);
+        List<HashMap<String, Object>> listTopIpByGroup = accessLogsMapper.listTopIpStatsByGroup(requestParam);
         listTopIpByGroup.forEach(each -> {
             ShortLinkStatsTopIpRespDTO statsTopIpRespDTO = ShortLinkStatsTopIpRespDTO.builder()
                     .ip(each.get("ip").toString())
@@ -397,40 +397,6 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
             osStats.add(osRespDTO);
         });
         /*
-         * 短链接分组监控之访客类型（指定时间内的访客：新访客，老访客）
-         */
-        List<ShortLinkStatsUvRespDTO> uvTypeStats = new ArrayList<>();
-        HashMap<String, Object> findUvTypeByGroup = accessLogsMapper.findUvTypeCntByGroup(requestParam);
-        int oldUserCnt = Integer.parseInt(
-                Optional.ofNullable(findUvTypeByGroup)
-                        .map(each -> each.get("oldUserCnt"))
-                        .map(Object::toString)
-                        .orElse("0")
-        );
-        int newUserCnt = Integer.parseInt(
-                Optional.ofNullable(findUvTypeByGroup)
-                        .map(each -> each.get("newUserCnt"))
-                        .map(Object::toString)
-                        .orElse("0")
-        );
-        int uvSum = oldUserCnt + newUserCnt;
-        double oldRatio = (double) oldUserCnt / uvSum;
-        double actualOldRatio = Math.round(oldRatio * 100.0) / 100.0;
-        double newRatio = (double) newUserCnt / uvSum;
-        double actualNewRatio = Math.round(newRatio * 100.0) / 100.0;
-        ShortLinkStatsUvRespDTO newUvRespDTO = ShortLinkStatsUvRespDTO.builder()
-                .uvType("newUser")
-                .cnt(newUserCnt)
-                .ratio(actualNewRatio)
-                .build();
-        uvTypeStats.add(newUvRespDTO);
-        ShortLinkStatsUvRespDTO oldUvRespDTO = ShortLinkStatsUvRespDTO.builder()
-                .uvType("oldUser")
-                .cnt(oldUserCnt)
-                .ratio(actualOldRatio)
-                .build();
-        uvTypeStats.add(oldUvRespDTO);
-        /*
          * 短链接分组监控之访问设备
          */
         List<ShortLinkStatsDeviceRespDTO> deviceStats = new ArrayList<>();
@@ -477,7 +443,6 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
                 .weekdayStats(weekdayStats)
                 .browserStats(browserStats)
                 .osStats(osStats)
-                .uvTypeStats(uvTypeStats)
                 .deviceStats(deviceStats)
                 .networkStats(networkStats)
                 .build();
@@ -486,7 +451,6 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         LambdaQueryWrapper<ShortLinkAccessLogsDO> lambdaQueryWrapper = Wrappers.lambdaQuery(ShortLinkAccessLogsDO.class)
-                .eq(ShortLinkAccessLogsDO::getGid, requestParam.getGid())
                 .eq(ShortLinkAccessLogsDO::getFullShortUrl, requestParam.getFullShortUrl())
                 .between(ShortLinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .orderByDesc(ShortLinkAccessLogsDO::getCreateTime);
@@ -515,11 +479,7 @@ public class ShortLinkStatsServiceImpl extends ServiceImpl<ShortLinkStatsMapper,
 
     @Override
     public IPage<ShortLinkGroupStatsAccessRecordRespDTO> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
-        LambdaQueryWrapper<ShortLinkAccessLogsDO> lambdaQueryWrapper = Wrappers.lambdaQuery(ShortLinkAccessLogsDO.class)
-                .eq(ShortLinkAccessLogsDO::getGid, requestParam.getGid())
-                .between(ShortLinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
-                .orderByDesc(ShortLinkAccessLogsDO::getCreateTime);
-        IPage<ShortLinkAccessLogsDO> accessDoPages = accessLogsMapper.selectPage(requestParam, lambdaQueryWrapper);
+        IPage<ShortLinkAccessLogsDO> accessDoPages = accessLogsMapper.selectGroupPage(requestParam);
         if (accessDoPages.getRecords().isEmpty()) {
             // 如果没有人访问，那么返回空
             return null;

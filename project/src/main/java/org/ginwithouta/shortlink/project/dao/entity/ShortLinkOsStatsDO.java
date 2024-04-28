@@ -15,18 +15,13 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_os_statistics")
+@TableName("t_link_os_stats")
 @EqualsAndHashCode(callSuper = true)
 public class ShortLinkOsStatsDO extends BaseDO {
     /**
      * 完整短链接
      */
     private String fullShortUrl;
-
-    /**
-     * 分组标识
-     */
-    private String gid;
 
     /**
      * 日期

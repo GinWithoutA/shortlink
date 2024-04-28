@@ -100,4 +100,9 @@ public class ShortLinkPageRespDTO {
      * 今日 UIP
      */
     private Integer todayUip;
+
+    /**
+     * 启用标识 1：启用 0：未启用
+     */
+    private Integer enableStatus;
 }

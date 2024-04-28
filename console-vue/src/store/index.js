@@ -5,7 +5,7 @@ const store = createStore({
   state() {
     return {
       // domain: 'nurl.ink'
-      domain: 'tinybridge.intbeast.top'
+      domain: 'tiny.intbeast.top'
     }
   }
 })

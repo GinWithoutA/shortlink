@@ -23,7 +23,7 @@ public interface ShortLinkStatsService extends IService<ShortLinkStatsDO> {
      * @param requestParam 请求参数（完整短链接，分组标识，开始时间，结束时间）
      * @return  单个短链接指定时间内的监控数据
      */
-    ShortLinkStatsRespDTO oneShortLinkStatistics(ShortLinkStatsReqDTO requestParam);
+    ShortLinkStatsRespDTO shortLinkStats(ShortLinkStatsReqDTO requestParam);
 
     /**
      * 访问单个短链接指定时间内访问记录监控数据
@@ -40,5 +40,5 @@ public interface ShortLinkStatsService extends IService<ShortLinkStatsDO> {
      * @param requestParam 请求参数（分组标识，开始时间，结束时间）
      * @return  分组短链接指定时间内的监控数据
      */
-    ShortLinkGroupStatsRespDTO groupShortLinkStatistics(ShortLinkGroupStatsReqDTO requestParam);
+    ShortLinkGroupStatsRespDTO shortLinkGroupStats(ShortLinkGroupStatsReqDTO requestParam);
 }

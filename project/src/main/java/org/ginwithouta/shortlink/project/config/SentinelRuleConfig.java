@@ -16,7 +16,6 @@ import static org.ginwithouta.shortlink.project.common.constant.SentinelConstant
  * Generate at 2024/2/16
  * 初始化限流配置
  */
-@Component
 public class SentinelRuleConfig implements InitializingBean {
 
     @Override
@@ -27,7 +26,7 @@ public class SentinelRuleConfig implements InitializingBean {
         // 根据 QPS 进行限制
         createOrderRule.setGrade(RuleConstant.FLOW_GRADE_QPS);
         // 设置接口的访问上限
-        createOrderRule.setCount(1);
+        createOrderRule.setCount(100);
         rules.add(createOrderRule);
         FlowRuleManager.loadRules(rules);
     }

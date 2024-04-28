@@ -36,7 +36,7 @@ public class ShortLinkUpdateReqDTO {
     /**
      * 短链接启用标识 0 未启用 1 已启用
      */
-    private Integer enable;
+    private Integer enableStatus;
 
     /**
      * 有效期类型 0 永久有效 1 临时有效

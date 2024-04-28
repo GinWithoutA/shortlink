@@ -71,6 +71,6 @@ public class TokenValidateGatewayFilterFactory extends AbstractGatewayFilterFact
 
     private boolean isPathInWhiteList(String requestPath, String requestMethod, List<String> whitePathList) {
         return (!CollectionUtils.isEmpty(whitePathList) && whitePathList.stream().anyMatch(requestPath::startsWith))
-                || (Objects.equals(requestPath, "/api/short-link/admin/v1/user") && Objects.equals(requestMethod, "POST"));
+                || (Objects.equals(requestPath, "/api/short/link/admin/v1/user") && Objects.equals(requestMethod, "POST"));
     }
 }

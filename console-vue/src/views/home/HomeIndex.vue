@@ -5,41 +5,22 @@
         <div class="header">
           <div @click="toMySpace" class="logo">Tiny Bridge 短链接平台</div>
           <div style="display: flex; align-items: center">
-            <a
-              class="link-span"
-              style="text-decoration: none"
-              target="_blank"
-              href="https://nageoffer.com/shortlink/"
-              >官方文档</a
-            >
-            <a
-              class="link-span"
-              style="text-decoration: none"
-              target="_blank"
-              href="https://nageoffer.com/group/"
-              >加沟通群</a
-            >
-            <a
-                class="link-span"
-                style="text-decoration: none"
-                target="_blank"
-                href="https://nageoffer.com/shortlink/video/"
-            >🔥视频教程</a
-            >
-            <a
+            <!-- <a class="link-span" style="text-decoration: none" target="_blank"
+              href="https://nageoffer.com/shortlink/">官方文档</a> -->
+            <!-- <a class="link-span" style="text-decoration: none" target="_blank"
+              href="https://nageoffer.com/group/">加沟通群</a> -->
+            <a class="link-span" style="text-decoration: none" target="_blank"
+              href="https://github.com/GinWithoutA">🔥Github</a>
+            <!-- <a
                 class="link-span"
                 style="text-decoration: none"
                 target="_blank"
                 href="http://shortlink.magestack.cn"
             >演示环境</a
-            >
+            > -->
             <el-dropdown>
               <div class="block">
-                <span
-                    class="name-span"
-                    style="text-decoration: none"
-                >{{username}}</span
-                >
+                <span class="name-span" style="text-decoration: none">{{username}}</span>
               </div>
               <template #dropdown>
                 <el-dropdown-menu>

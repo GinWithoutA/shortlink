@@ -13,7 +13,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication(scanBasePackages = {
         "org.ginwithouta.shortlink.project",
         "org.ginwithouta.shortlink.admin",
-        "org.ginwithouta.shortlink.aggregation"
+        "org.ginwithouta.shortlink.aggregation",
 })
 @EnableDiscoveryClient
 @MapperScan(value = {

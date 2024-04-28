@@ -15,18 +15,13 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_browser_statistics")
+@TableName("t_link_browser_stats")
 @EqualsAndHashCode(callSuper = true)
 public class ShortLinkBrowserStatsDO extends BaseDO {
     /**
      * 完整短链接
      */
     private String fullShortUrl;
-
-    /**
-     * 分组标识
-     */
-    private String gid;
 
     /**
      * 日期

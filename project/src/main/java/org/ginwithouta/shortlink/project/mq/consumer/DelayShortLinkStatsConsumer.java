@@ -10,7 +10,6 @@ import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.LockSupport;
@@ -24,7 +23,6 @@ import static org.ginwithouta.shortlink.project.common.enums.ShortLinkErrorCodeE
  * 短链接统计记录延迟消费消费者
  */
 @Slf4j
-@Component
 @Deprecated
 @RequiredArgsConstructor
 public class DelayShortLinkStatsConsumer implements InitializingBean {
@@ -54,7 +52,7 @@ public class DelayShortLinkStatsConsumer implements InitializingBean {
                             throw new ServiceException(SHORT_LINK_STATS_MQ_NOT_ACCOMPLISH);
                         }
                         try {
-                            shortLinkService.shortLinkStats(statsRecord);
+                            shortLinkService.shortLinkStats(null, null, statsRecord);
                         } catch (Throwable ex) {
                             messageQueueIdempotentHandler.delMessageProcessed(statsRecord.getKeys());
                             log.error("延迟记录短链接监控消费异常", ex);
@@ -72,6 +70,6 @@ public class DelayShortLinkStatsConsumer implements InitializingBean {
 
     @Override
     public void afterPropertiesSet() {
-        onMessage();
+        //onMessage();
     }
 }

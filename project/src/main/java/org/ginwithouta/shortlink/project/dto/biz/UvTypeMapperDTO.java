@@ -34,4 +34,9 @@ public class UvTypeMapperDTO {
      * 监控数据的结束日期
      */
     private String endDate;
+
+    /**
+     * 启用状态 0：未启用 1：启用
+     */
+    private Integer enableStatus;
 }

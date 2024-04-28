@@ -19,33 +19,35 @@ public interface ShortLinkNetworkStatsMapper extends BaseMapper<ShortLinkNetwork
 
     /**
      * 记录网络访问监控数据
-     * @param networkStatisticsDO 短链接访问网络监控入参
+     * @param networkStatsDO 短链接访问网络监控入参
      */
     @Insert("INSERT INTO" +
-            "  t_network_statistics (full_short_url, gid, date, cnt, network, create_time, update_time, del_flag) " +
+            "  t_link_network_stats (full_short_url, date, cnt, network, create_time, update_time, del_flag) " +
             "VALUES " +
-            "  (#{networkStatisticsDO.fullShortUrl}, #{networkStatisticsDO.gid}, #{networkStatisticsDO.date}, #{networkStatisticsDO.cnt}, " +
-            "   #{networkStatisticsDO.network}, NOW(), NOW(), 0) " +
-            "ON DUPLICATE KEY UPDATE" +
-            "  cnt = cnt + #{networkStatisticsDO.cnt}, update_time = NOW();")
-    void shortLinkNetworkStatistics(@Param("networkStatisticsDO") ShortLinkNetworkStatsDO networkStatisticsDO);
+            "  (#{networkStatsDO.fullShortUrl}, #{networkStatsDO.date}, #{networkStatsDO.cnt}, #{networkStatsDO.network}, NOW(), NOW(), 0) " +
+            "ON DUPLICATE KEY UPDATE cnt = cnt + #{networkStatsDO.cnt}, update_time = NOW();")
+    void shortLinkNetworkStats(@Param("networkStatsDO") ShortLinkNetworkStatsDO networkStatsDO);
 
     /**
      * 根据单个短链接获取网络类型访问监控数据
      */
-    @Select("SELECT network, SUM(cnt) AS cnt FROM t_network_statistics WHERE " +
-            "    full_short_url = #{requestParam.fullShortUrl} " +
-            "    AND gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY full_short_url, gid, network;")
+    @Select("SELECT tlns.network, SUM(tlns.cnt) AS cnt " +
+            "FROM t_link tl INNER JOIN t_link_network_stats tlns ON tl.full_short_url = tlns.full_short_url " +
+            "WHERE tlns.full_short_url = #{requestParam.fullShortUrl} " +
+            "   AND tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = #{requestParam.enableStatus} " +
+            "   AND tlns.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tlns.full_short_url, tl.gid, tlns.network;")
     List<ShortLinkNetworkStatsDO> listNetworkStatsByShortLink(@Param("requestParam") ShortLinkStatsReqDTO requestParam);
 
     /**
      * 根据短链接分组获取网络类型访问监控数据
      */
-    @Select("SELECT network, SUM(cnt) AS cnt FROM t_network_statistics WHERE " +
-            "    gid = #{requestParam.gid} " +
-            "    AND date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
-            "GROUP BY gid, network;")
+    @Select("SELECT tlns.network, SUM(tlns.cnt) AS cnt " +
+            "FROM t_link tl INNER JOIN t_link_network_stats tlns ON tl.full_short_url = tlns.full_short_url " +
+            "WHERE tl.gid = #{requestParam.gid} " +
+            "   AND tl.enable_status = #{requestParam.enableStatus} " +
+            "   AND tlns.date BETWEEN #{requestParam.startDate} and #{requestParam.endDate} " +
+            "GROUP BY tl.gid, tlns.network;")
     List<ShortLinkNetworkStatsDO> listNetworkStatsByGroup(@Param("requestParam") ShortLinkGroupStatsReqDTO requestParam);
 }

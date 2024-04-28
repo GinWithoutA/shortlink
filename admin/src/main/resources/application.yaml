@@ -4,7 +4,17 @@ spring:
   application:
     name: short-link-admin-service
   profiles:
-    active: dev
+    active: prod
+  datasource:
+    # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    # shardingsphere 配置文件路径
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:prod}.yaml
+  data:
+    redis:
+      port: 6379
+      host: 47.113.145.127
+      password: S8A1qmLF7nhGSvxEDZkeKw==
 mybatis-plus:
   global-config:
     db-config:

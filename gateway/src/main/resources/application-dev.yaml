@@ -1,13 +1,11 @@
 spring:
-  data:
-    redis:
-      host: 47.113.145.127
-      port: 6379
-      password: S8A1qmLF7nhGSvxEDZkeKw==
   cloud:
     nacos:
       discovery:
         server-addr: 47.94.0.36:8848
+        username: nacos
+        password: nacos
+
     gateway:
       routes:
         - id: short-link-admin-service
@@ -27,3 +25,6 @@ spring:
             - Path=/api/short/link/project/**
           filters:
             - name: TokenValidate
+logging:
+  level:
+    root: debug

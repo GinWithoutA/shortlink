@@ -5,11 +5,20 @@ spring:
   application:
     name: short-link-aggregation-service
   profiles:
-    active: dev
+    active: prod
   mvc:
     view:
       prefix: /templates/
       suffix: .html
+  data:
+    redis:
+      port: 6379
+      host: 47.113.145.127
+      password: S8A1qmLF7nhGSvxEDZkeKw==
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:prod}.yaml
+
 
 short-link:
   group:
@@ -19,7 +28,7 @@ short-link:
     time-window: 1
     max-access-count: 50
   domain:
-    default: tinybridge.intbeast.top
+    default: tiny.intbeast.top
   stats:
     locale:
       amap-key: a336bb745b866b677786215eb3d947c6

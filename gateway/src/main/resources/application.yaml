@@ -6,3 +6,8 @@ spring:
   profiles:
     active: prod
     # active: dev
+  data:
+    redis:
+      host: 47.113.145.127
+      port: 6379
+      password: S8A1qmLF7nhGSvxEDZkeKw==

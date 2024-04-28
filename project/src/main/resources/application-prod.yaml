@@ -1,15 +1,7 @@
 spring:
-  data:
-    redis:
-      port: 6379
-      host: 172.20.253.81
-      password: S8A1qmLF7nhGSvxEDZkeKw==
   cloud:
     nacos:
       discovery:
-        server-addr: 172.24.23.38:8848
-  datasource:
-    # 新版本实现了对 JDBC Driver 的自定义功能，实现分库分表等隐藏逻辑
-    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    # shardingsphere 配置文件路径
-    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:prod}.yaml
+        server-addr: 127.0.0.1:8848
+        username: nacos
+        password: nacos

@@ -1,13 +1,10 @@
 spring:
-  data:
-    redis:
-      port: 6379
-      host: 172.20.253.81
-      password: S8A1qmLF7nhGSvxEDZkeKw==
   cloud:
     nacos:
       discovery:
-        server-addr: 172.24.23.38:8848
-  datasource:
-    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
-    url: jdbc:shardingsphere:classpath:shardingsphere-config-${database.env:prod}.yaml
+        server-addr: 127.0.0.1:8848
+        username: nacos
+        password: nacos
+logging:
+  level:
+    root: info
